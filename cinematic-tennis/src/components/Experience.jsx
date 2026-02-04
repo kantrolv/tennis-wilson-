@@ -124,10 +124,10 @@ export default function Experience() {
                 // Spin
                 bRot.x = Math.PI * 4 + (tSwing * Math.PI * 2);
 
-                // User: "at this point (where ball covers screen) change to beige"
+                // User requested Royal Blue for main site match
                 if (p > 0.65) {
-                    // > 65%: Beige BG, Ball Gone
-                    state.scene.background.setHex(0xf5f5dc);
+                    // > 65%: Royal Blue BG
+                    state.scene.background.setHex(0x051025);
                     bScale.set(0, 0, 0);
                 } else {
                     // 50-65%: Dark BG
@@ -143,8 +143,8 @@ export default function Experience() {
             rRot.x = -Math.PI / 2 + 0.2;
             rPos.z = -10;
 
-            // p > 0.75 is > 70% -> Always Beige / Ball Gone
-            state.scene.background.setHex(0xf5f5dc);
+            // p > 0.75 is > 70% -> Always Royal Blue / Ball Gone
+            state.scene.background.setHex(0x051025);
             bScale.set(0, 0, 0);
             bPos.z = 15; // Just in case, keep z high
         } else {
@@ -153,8 +153,14 @@ export default function Experience() {
         }
 
         // Apply Damping
-        // Lower lambda = Sweeter/Smoother (more inertia).
-        const lambda = 2.5;
+        // Dynamic Lambda: Smooth (1.5) when slow, Snappy (10+) when fast.
+        // This ensures the ball doesn't get "left behind" during fast scrolls.
+        const velocity = Math.abs(scrollState.velocity || 0);
+        const baseLambda = 1.5;
+        const dynamicLambda = velocity > 50 ? 12.0 : (velocity > 20 ? 6.0 : baseLambda);
+
+        // Use the higher value to keep up with user input
+        const lambda = dynamicLambda;
 
         if (racketRef.current) {
             racketRef.current.position.x = damp(racketRef.current.position.x, rPos.x, lambda, delta);

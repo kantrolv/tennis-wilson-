@@ -19,6 +19,12 @@ const userSchema = mongoose.Schema({
         type: Boolean,
         required: true,
         default: false
+    },
+    role: {
+        type: String,
+        required: true,
+        enum: ['user', 'recruiter'],
+        default: 'user'
     }
 }, {
     timestamps: true

@@ -1,20 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
 
-:root {
-  /* Core Palette */
-  --c-ivory: #fcfcf7;
-  --c-charcoal: #111111;
-  --c-tennis-green: #ccff00;
-  --c-grey-light: #e5e5e5;
-  --c-grey-medium: #888888;
+@import './theme/variables.css';
 
-  /* Typography */
-  --font-serif: 'Playfair Display', serif;
-  --font-sans: 'Inter', sans-serif;
+/* :root variables are now in theme/variables.css */
 
-  /* Spacing */
-  --spacing-section: 100vh;
-}
 
 * {
   box-sizing: border-box;
@@ -25,7 +14,7 @@
 }
 
 body {
-  background-color: var(--c-charcoal);
+  background-color: var(--c-bg-main);
   /* Start dark for cinematic intro */
   color: var(--c-ivory);
   font-family: var(--font-sans);

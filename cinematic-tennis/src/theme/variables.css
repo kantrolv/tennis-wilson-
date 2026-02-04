@@ -1,0 +1,30 @@
+:root {
+    /* Premium Palette */
+    --c-royal-blue: #051025; /* Deepest Midnight Blue */
+    --c-royal-blue-light: #0d2247;
+    --c-gold: #D4AF37;
+    --c-gold-dim: #8a7122;
+    --c-ivory: #fcfcf7;
+    --c-white-soft: #e5e5e5;
+    
+    /* Functional Colors */
+    --c-bg-main: var(--c-royal-blue);
+    --c-text-main: var(--c-ivory);
+    --c-text-muted: #8892b0;
+    --c-accent: var(--c-gold);
+
+    /* Typography */
+    --font-serif: 'Playfair Display', serif;
+    --font-sans: 'Inter', sans-serif;
+
+    /* Spacing */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 2rem;
+    --spacing-lg: 4rem;
+    --spacing-xl: 8rem;
+    
+    /* Layout */
+    --header-height: 80px;
+    --container-width: 1400px;
+}

@@ -16,7 +16,7 @@ export function useScroll() {
         window.scrollTo(0, 0);
 
         const trigger = ScrollTrigger.create({
-            trigger: document.querySelector('.scroll-container') || document.body,
+            trigger: document.querySelector('.cinematic-spacer') || document.body,
             start: 'top top',
             end: 'bottom bottom',
             scrub: 0,
