@@ -28,11 +28,13 @@ app.get('/', (req, res) => {
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const orderRoutes = require('./routes/orderRoutes');
+const racketRoutes = require('./routes/rackets.routes');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/rackets', racketRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

@@ -1,5 +1,6 @@
 import { Canvas } from "@react-three/fiber";
 import { Suspense, useEffect, useRef, useState } from "react";
+import axios from 'axios';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Experience from "./components/Experience";
 import Auth from './pages/Auth';
@@ -83,9 +84,42 @@ function App() {
                 <CheckoutDemo
                   product={checkoutProduct}
                   onClose={() => setCheckoutProduct(null)}
-                  onConfirm={() => {
-                    alert("Welcome to the game. Order placed!");
-                    setCheckoutProduct(null);
+                  onConfirm={async () => {
+                    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+
+                    if (!userInfo || !userInfo.token) {
+                      alert("Please log in to place an order.");
+                      window.location.href = '/auth';
+                      return;
+                    }
+
+                    try {
+                      const config = {
+                        headers: {
+                          'Content-Type': 'application/json',
+                          Authorization: `Bearer ${userInfo.token}`,
+                        },
+                      };
+
+                      const orderData = {
+                        orderItems: [{
+                          name: checkoutProduct.name,
+                          qty: 1,
+                          image: checkoutProduct.imageUrl,
+                          price: checkoutProduct.price,
+                          product: checkoutProduct._id
+                        }],
+                        totalPrice: checkoutProduct.price
+                      };
+
+                      await axios.post('http://localhost:5001/api/orders', orderData, config);
+
+                      alert(`Order placed successfully for ${checkoutProduct.name}!`);
+                      setCheckoutProduct(null);
+                    } catch (error) {
+                      console.error("Order failed:", error);
+                      alert("Failed to place order. Please try again.");
+                    }
                   }}
                 />
               </>
