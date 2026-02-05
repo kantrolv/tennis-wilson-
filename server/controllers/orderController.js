@@ -1,6 +1,8 @@
 const asyncHandler = require('express-async-handler');
 const Order = require('../models/Order');
 
+const Product = require('../models/Product'); // Ensure Product is imported
+
 // @desc    Create new order
 // @route   POST /api/orders
 // @access  Private
@@ -15,6 +17,33 @@ const addOrderItems = asyncHandler(async (req, res) => {
         throw new Error('No order items');
         return;
     } else {
+        // 1. Validate and Deduct Stock Atomically for EACH item
+        // This prevents race conditions.
+
+        for (const item of orderItems) {
+            const { product: productId, gripSize, qty } = item;
+
+            // Atomic Update: Decrement stock ONLY if > 0
+            // Syntax for Map/Object nested key: "gripStock.4-1/2"
+            const updatedProduct = await Product.findOneAndUpdate(
+                {
+                    _id: productId,
+                    [`gripStock.${gripSize}`]: { $gte: qty } // Ensure enough stock
+                },
+                {
+                    $inc: { [`gripStock.${gripSize}`]: -qty } // Deduct stock
+                },
+                { new: true }
+            );
+
+            if (!updatedProduct) {
+                res.status(400);
+                throw new Error(`Item ${item.name} (Grip: ${gripSize}) is out of stock`);
+                return; // Stop execution
+            }
+        }
+
+        // 2. If all stock deductions successful, create order
         const order = new Order({
             user: req.user._id,
             orderItems,

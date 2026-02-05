@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import RegionSelector from '../ui/RegionSelector';
 
 const Header = () => {
@@ -28,18 +29,26 @@ const Header = () => {
         </div>
 
         <nav style={{ display: 'flex', gap: '2rem' }}>
-          {['Rackets', 'Strings', 'Equipment', 'Custom'].map(item => (
-            <a key={item} href="#" style={{
-              textDecoration: 'none',
-              color: 'inherit',
-              fontFamily: 'var(--font-sans)',
-              fontSize: '0.9rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em'
-            }}>
-              {item}
-            </a>
-          ))}
+          <Link to="/" style={{
+            textDecoration: 'none',
+            color: 'inherit',
+            fontFamily: 'var(--font-sans)',
+            fontSize: '0.9rem',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em'
+          }}>
+            Home
+          </Link>
+          <Link to="/rackets" style={{
+            textDecoration: 'none',
+            color: 'inherit',
+            fontFamily: 'var(--font-sans)',
+            fontSize: '0.9rem',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em'
+          }}>
+            Rackets
+          </Link>
         </nav>
       </div>
 

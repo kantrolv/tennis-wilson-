@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const Product = require('./models/Product');
 const User = require('./models/User');
-const products = require('./data/products');
+const products = require('./data/wilson_package_enriched.json');
 
 dotenv.config();
 

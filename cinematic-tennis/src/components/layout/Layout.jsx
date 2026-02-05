@@ -15,23 +15,36 @@ const Layout = ({ children }) => {
         if (!mainRef.current || !footerRef.current) return;
 
         const ctx = gsap.context(() => {
-            // Animation for Main Content reveal
-            gsap.fromTo([mainRef.current, footerRef.current],
-                { autoAlpha: 0, y: 50 }, // Start hidden and slightly down
-                {
+            const triggerEl = document.querySelector(".cinematic-spacer");
+
+            if (triggerEl) {
+                // Home Page Animation: Scroll Triggered
+                gsap.fromTo([mainRef.current, footerRef.current],
+                    { autoAlpha: 0, y: 50 },
+                    {
+                        autoAlpha: 1,
+                        y: 0,
+                        duration: 1.5,
+                        ease: "power2.out",
+                        scrollTrigger: {
+                            trigger: triggerEl,
+                            start: "65% top",
+                            end: "80% top",
+                            toggleActions: "play none none reverse",
+                            scrub: 1
+                        }
+                    }
+                );
+            } else {
+                // Standard Page Animation: Immediate Fade In
+                gsap.to([mainRef.current, footerRef.current], {
                     autoAlpha: 1,
                     y: 0,
-                    duration: 1.5,
+                    duration: 0.8,
                     ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: ".cinematic-spacer",
-                        start: "65% top", // Matches the ball hitting the screen
-                        end: "80% top",
-                        toggleActions: "play none none reverse", // Play on enter, reverse on leave
-                        scrub: 1 // Smooth scrubbing (1 sec lag)
-                    }
-                }
-            );
+                    delay: 0.2 // Small delay for smooth entry
+                });
+            }
         });
 
         return () => ctx.revert();

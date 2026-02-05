@@ -10,6 +10,7 @@ const orderSchema = mongoose.Schema({
         {
             name: { type: String, required: true },
             qty: { type: Number, required: true },
+            gripSize: { type: String, required: true }, // Size stored in order
             image: { type: String }, // optional, for display
             price: { type: Number, required: true },
             product: {
