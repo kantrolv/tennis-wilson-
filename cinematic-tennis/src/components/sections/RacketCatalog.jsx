@@ -233,9 +233,9 @@ const RacketCatalog = ({ onCheckout }) => {
                             overflow: 'visible', // Allow content to flow
                             position: 'relative',
                             cursor: 'pointer',
-                            display: 'flex',
                             flexDirection: 'column',
-                            transformStyle: 'preserve-3d'
+                            transformStyle: 'preserve-3d',
+                            opacity: 0 // Start hidden for GSAP to reveal
                         }}
                     >
                         {/* Image Area - The Colored Box */}

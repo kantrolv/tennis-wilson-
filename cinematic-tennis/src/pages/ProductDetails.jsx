@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useRegion } from '../context/RegionContext';
+import { useCart } from '../context/CartContext'; // Import Cart Hook
 import Layout from '../components/layout/Layout';
 import gsap from 'gsap';
 
 const ProductDetails = () => {
     const { id } = useParams();
     const { region } = useRegion();
+    const { addToCart } = useCart(); // Use Cart
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -44,6 +46,15 @@ const ProductDetails = () => {
         }
     }, [loading, product]);
 
+    const handleAddToCart = () => {
+        if (!selectedGrip) {
+            alert("Please select a grip size.");
+            return;
+        }
+        addToCart(product, selectedGrip.size);
+        // Optional: Custom toast here instead of auto-open logic in context
+    };
+
     if (loading) return (
         <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#F7F7F5' }}>
             Loading...
@@ -68,7 +79,7 @@ const ProductDetails = () => {
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', // Responsive split
                     gap: '4rem',
-                    maxWidth: '1400px',
+                    maxWidth: '1600px', // Wider container for bigger impact
                     margin: '0 auto',
                     padding: '2rem 4vw'
                 }}>
@@ -76,22 +87,25 @@ const ProductDetails = () => {
                     {/* Left: Big Image */}
                     <div ref={imageRef} style={{
                         backgroundColor: '#F4F4F4',
-                        borderRadius: '4px',
+                        borderRadius: '0px', // Sharper, more premium
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        minHeight: '600px', // Tall and imposing
-                        position: 'relative'
+                        height: '80vh', // HUGE image container
+                        position: 'sticky',
+                        top: '100px',
+                        overflow: 'hidden'
                     }}>
                         {product.imageUrl ? (
                             <img
                                 src={product.imageUrl}
                                 alt={product.name}
                                 style={{
-                                    maxHeight: '85%',
-                                    maxWidth: '85%',
+                                    height: '90%', // Fill the container
+                                    width: 'auto',
                                     objectFit: 'contain',
-                                    filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.1))'
+                                    filter: 'drop-shadow(0 30px 60px rgba(0,0,0,0.15))', // Deeper shadow for depth
+                                    transform: 'scale(1.1)' // Slight zoom for impact
                                 }}
                             />
                         ) : (
@@ -100,7 +114,7 @@ const ProductDetails = () => {
                     </div>
 
                     {/* Right: Product Info */}
-                    <div ref={infoRef} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <div ref={infoRef} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '2rem 0' }}>
                         <span style={{
                             textTransform: 'uppercase',
                             letterSpacing: '0.1em',
@@ -113,7 +127,7 @@ const ProductDetails = () => {
 
                         <h1 style={{
                             fontFamily: 'var(--font-serif)',
-                            fontSize: '3rem',
+                            fontSize: '3.5rem', // Larger Details Title
                             margin: '0 0 1rem',
                             lineHeight: 1.1,
                             color: '#111'
@@ -121,13 +135,13 @@ const ProductDetails = () => {
                             {product.name}
                         </h1>
 
-                        <div style={{ fontSize: '1.5rem', fontWeight: 600, color: '#111', marginBottom: '2rem' }}>
+                        <div style={{ fontSize: '2rem', fontWeight: 600, color: '#111', marginBottom: '2.5rem' }}>
                             {region.currencySymbol}{Math.round(product.price * region.multiplier).toLocaleString()}.00
                         </div>
 
                         {/* Inventory / Grip Selection */}
-                        <div style={{ marginBottom: '2rem' }}>
-                            <h3 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: '#111' }}>Grip Size</h3>
+                        <div style={{ marginBottom: '2.5rem' }}>
+                            <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem', color: '#111' }}>Select Grip Size</h3>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem' }}>
                                 {product.gripStock && Object.entries(product.gripStock).map(([size, stock]) => (
                                     <button
@@ -136,15 +150,16 @@ const ProductDetails = () => {
                                         onClick={() => setSelectedGrip({ size, stock })}
                                         style={{
                                             padding: '1rem 2rem',
-                                            border: selectedGrip?.size === size ? '2px solid #111' : '1px solid #ddd',
-                                            background: selectedGrip?.size === size ? '#fff' : 'transparent',
-                                            color: stock === 0 ? '#ccc' : '#111',
-                                            borderRadius: '4px',
+                                            border: selectedGrip?.size === size ? '2px solid #111' : '1px solid #e0e0e0',
+                                            background: selectedGrip?.size === size ? '#111' : 'transparent', // Solid active state
+                                            color: selectedGrip?.size === size ? '#fff' : (stock === 0 ? '#ccc' : '#111'),
+                                            borderRadius: '0px', // Squared off for "technical" feel
                                             cursor: stock === 0 ? 'not-allowed' : 'pointer',
                                             minWidth: '80px',
                                             position: 'relative',
                                             transition: 'all 0.2s',
-                                            fontWeight: 500
+                                            fontWeight: 500,
+                                            fontSize: '0.9rem'
                                         }}
                                     >
                                         {size}
@@ -152,45 +167,50 @@ const ProductDetails = () => {
                                 ))}
                             </div>
                             {selectedGrip && (
-                                <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: selectedGrip.stock < 3 ? '#e53e3e' : '#2f855a' }}>
-                                    {selectedGrip.stock > 0 ? `In Stock (${selectedGrip.stock})` : 'Out of Stock'}
+                                <div style={{ marginTop: '0.8rem', fontSize: '0.85rem', color: selectedGrip.stock < 3 ? '#e53e3e' : '#2f855a', fontWeight: 500 }}>
+                                    {selectedGrip.stock > 0 ? `In Stock (${selectedGrip.stock} available)` : 'Out of Stock'}
                                 </div>
                             )}
                         </div>
 
-                        {/* Stringing Options - Placeholder for now as user requested */}
-                        <div style={{ marginBottom: '2rem' }}>
-                            <h3 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: '#111' }}>Stringing</h3>
+                        {/* Stringing - Still Placeholder */}
+                        <div style={{ marginBottom: '2.5rem' }}>
+                            <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem', color: '#111' }}>Stringing</h3>
                             <div style={{ display: 'flex', gap: '1rem' }}>
-                                <button style={{ padding: '1rem 2rem', border: '1px solid #111', background: 'transparent', borderRadius: '4px', cursor: 'pointer' }}>
+                                <button style={{ padding: '1rem 2rem', border: '1px solid #111', background: 'transparent', borderRadius: '0', cursor: 'pointer' }}>
                                     Unstrung
                                 </button>
-                                <button style={{ padding: '1rem 2rem', border: '1px solid #ddd', background: 'transparent', borderRadius: '4px', cursor: 'pointer' }}>
+                                <button style={{ padding: '1rem 2rem', border: '1px solid #e0e0e0', background: 'transparent', borderRadius: '0', cursor: 'pointer', color: '#888' }}>
                                     Strung (+ $20)
                                 </button>
                             </div>
                         </div>
 
-                        <button style={{
-                            backgroundColor: '#111',
-                            color: '#fff',
-                            border: 'none',
-                            padding: '1.2rem',
-                            fontSize: '1rem',
-                            fontWeight: 600,
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.1em',
-                            borderRadius: '50px',
-                            cursor: 'pointer',
-                            marginTop: '1rem',
-                            opacity: selectedGrip ? 1 : 0.5,
-                            pointerEvents: selectedGrip ? 'auto' : 'none',
-                            transition: 'opacity 0.2s'
-                        }}>
-                            Add to Cart
+                        <button
+                            onClick={handleAddToCart}
+                            disabled={!selectedGrip || selectedGrip.stock === 0}
+                            style={{
+                                backgroundColor: '#111',
+                                color: '#fff',
+                                border: 'none',
+                                padding: '1.4rem',
+                                fontSize: '1rem',
+                                fontWeight: 700,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.15em',
+                                borderRadius: '0', // Square button
+                                cursor: (!selectedGrip || selectedGrip.stock === 0) ? 'not-allowed' : 'pointer',
+                                marginTop: '1rem',
+                                opacity: (!selectedGrip || selectedGrip.stock === 0) ? 0.6 : 1,
+                                transition: 'all 0.3s',
+                                width: '100%', // Full width CTA
+                                maxWidth: '400px'
+                            }}
+                        >
+                            {selectedGrip ? 'Add to Cart' : 'Select a Grip Size'}
                         </button>
 
-                        <div style={{ marginTop: '2rem', fontSize: '0.9rem', lineHeight: 1.6, color: '#444' }}>
+                        <div style={{ marginTop: '3rem', fontSize: '1rem', lineHeight: 1.7, color: '#444', maxWidth: '500px' }}>
                             <p>{product.description}</p>
                         </div>
                     </div>

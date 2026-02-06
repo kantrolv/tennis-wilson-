@@ -8,6 +8,7 @@ import "./index.css";
 import ReactLenis from "lenis/react";
 import gsap from "gsap";
 import { RegionProvider } from "./context/RegionContext";
+import { CartProvider } from "./context/CartContext";
 
 function App() {
   const lenisRef = useRef();
@@ -26,16 +27,18 @@ function App() {
 
   return (
     <RegionProvider>
-      <Router>
-        <ReactLenis root ref={lenisRef} autoRaf={false}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/rackets" element={<Rackets />} />
-            <Route path="/rackets/:id" element={<ProductDetails />} />
-            <Route path="/auth" element={<Auth />} />
-          </Routes>
-        </ReactLenis>
-      </Router>
+      <CartProvider>
+        <Router>
+          <ReactLenis root ref={lenisRef} autoRaf={false}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/rackets" element={<Rackets />} />
+              <Route path="/rackets/:id" element={<ProductDetails />} />
+              <Route path="/auth" element={<Auth />} />
+            </Routes>
+          </ReactLenis>
+        </Router>
+      </CartProvider>
     </RegionProvider>
   );
 }
