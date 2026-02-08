@@ -10,7 +10,12 @@ export const CartProvider = ({ children }) => {
     const [cart, setCart] = useState(() => {
         try {
             const localData = localStorage.getItem('wilson_cart');
-            return localData ? JSON.parse(localData) : [];
+            const parsed = localData ? JSON.parse(localData) : [];
+            if (!Array.isArray(parsed)) return [];
+
+            // Validate items - filter out those without IDs or migrate if possible
+            // In this case, just filter out bad ones to prevent crash
+            return parsed.filter(item => item && (item.cartId || item._id));
         } catch (e) {
             console.error("Failed to parse cart from local storage", e);
             return [];
@@ -27,32 +32,48 @@ export const CartProvider = ({ children }) => {
         }
     }, [cart]);
 
-    const addToCart = (product, gripSize, quantity = 1) => {
+    const addToCart = (product, options, quantity = 1) => {
         setCart(prevCart => {
-            // Check if item with same ID AND grip size exists
-            const existingItemIndex = prevCart.findIndex(
-                item => item._id === product._id && item.selectedGrip === gripSize
-            );
+            // Generate a unique ID for this specific combination
+            // options expected: { gripSize, string, cover }
+            const cartId = `${product._id}-${options.gripSize}-${options.string?.id || 'none'}-${options.cover?.id || 'none'}`;
+
+            // Calculate total price for this specific item configuration
+            const basePrice = product.price;
+            const stringPrice = options.string ? options.string.price : 0;
+            const coverPrice = options.cover ? options.cover.price : 0;
+            const itemPrice = basePrice + stringPrice + coverPrice;
+
+            const existingItemIndex = prevCart.findIndex(item => item.cartId === cartId);
 
             if (existingItemIndex > -1) {
                 const newCart = [...prevCart];
                 newCart[existingItemIndex].quantity += quantity;
                 return newCart;
             } else {
-                return [...prevCart, { ...product, selectedGrip: gripSize, quantity }];
+                return [...prevCart, {
+                    ...product,
+                    cartId,
+                    selectedGrip: options.gripSize,
+                    selectedString: options.string,
+                    selectedCover: options.cover,
+                    price: itemPrice, // Store the calculated price including add-ons
+                    basePrice: product.price, // Keep original base price for reference
+                    quantity
+                }];
             }
         });
-        setIsCartOpen(true); // Auto open cart on add
+        setIsCartOpen(true);
     };
 
-    const removeFromCart = (productId, gripSize) => {
-        setCart(prevCart => prevCart.filter(item => !(item._id === productId && item.selectedGrip === gripSize)));
+    const removeFromCart = (cartId) => {
+        setCart(prevCart => prevCart.filter(item => item.cartId !== cartId));
     };
 
-    const updateQuantity = (productId, gripSize, newQty) => {
+    const updateQuantity = (cartId, newQty) => {
         if (newQty < 1) return;
         setCart(prevCart => prevCart.map(item =>
-            (item._id === productId && item.selectedGrip === gripSize)
+            item.cartId === cartId
                 ? { ...item, quantity: newQty }
                 : item
         ));

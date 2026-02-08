@@ -2,7 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import RegionSelector from '../ui/RegionSelector';
 
+import { useCart } from '../../context/CartContext';
+
 const Header = () => {
+  const { cartCount, setIsCartOpen } = useCart();
+
   return (
     <header style={{
       position: 'fixed',
@@ -66,8 +70,12 @@ const Header = () => {
         }}>
           Login
         </a>
-        <div className="cart-icon">
-          <span style={{ fontSize: '0.9rem', textTransform: 'uppercase' }}>Cart (0)</span>
+        <div
+          className="cart-icon"
+          onClick={() => setIsCartOpen(true)}
+          style={{ cursor: 'pointer' }}
+        >
+          <span style={{ fontSize: '0.9rem', textTransform: 'uppercase' }}>Cart ({cartCount})</span>
         </div>
       </div>
     </header>
