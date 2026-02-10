@@ -1,16 +1,24 @@
 import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import RegionSelector from '../ui/RegionSelector';
 import AuthContext from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import { useRegion } from '../../context/RegionContext';
 
 const Header = () => {
   const { cartCount, setIsCartOpen } = useCart();
   const { user, logout } = useContext(AuthContext);
+  const { openSelector } = useRegion();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     window.location.href = '/'; // Force redirect to home
+  };
+
+  const handleRacketsClick = (e) => {
+    e.preventDefault();
+    openSelector(() => navigate('/rackets'));
   };
 
   return (
@@ -51,16 +59,17 @@ const Header = () => {
           }}>
             Home
           </Link>
-          <Link to="/rackets" style={{
+          <a href="/rackets" onClick={handleRacketsClick} style={{
             textDecoration: 'none',
             color: 'inherit',
             fontFamily: 'var(--font-sans)',
             fontSize: '0.9rem',
             textTransform: 'uppercase',
-            letterSpacing: '0.05em'
+            letterSpacing: '0.05em',
+            cursor: 'pointer'
           }}>
             Rackets
-          </Link>
+          </a>
         </nav>
       </div>
 

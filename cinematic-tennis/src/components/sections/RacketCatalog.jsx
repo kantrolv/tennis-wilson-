@@ -1,353 +1,417 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import axios from 'axios';
 import { useRegion } from '../../context/RegionContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import '../../styles/Shop.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const RacketCatalog = ({ onCheckout }) => {
     const { region } = useRegion();
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
+
     const [rackets, setRackets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [activeCategory, setActiveCategory] = useState('All');
-    const [searchQuery, setSearchQuery] = useState('');
+    const [isMobileFilterOpen, setMobileFilterOpen] = useState(false);
+
+    // Initial Filter State from URL
+    const initialFilters = useMemo(() => ({
+        series: searchParams.get('series') ? searchParams.get('series').split(',') : [],
+        minPrice: searchParams.get('minPrice') || '',
+        maxPrice: searchParams.get('maxPrice') || '',
+        ageGroup: searchParams.get('ageGroup') || 'All'
+    }), [searchParams]);
+
+    const [filters, setFilters] = useState(initialFilters);
+    const [priceRange, setPriceRange] = useState({ min: 0, max: 500 }); // For slider visual calculation
 
     // Refs for animations
     const containerRef = useRef(null);
-    const headerRef = useRef(null);
     const gridRef = useRef(null);
-    const cardsRef = useRef([]);
 
+    // Fetch Rackets with Filters
     useEffect(() => {
         const fetchRackets = async () => {
+            setLoading(true);
             try {
-                const { data } = await axios.get('http://localhost:5001/api/rackets');
+                const params = new URLSearchParams();
+                if (filters.series.length > 0) params.append('series', filters.series.join(','));
+
+                // Convert user-entered price (in local currency) to base price (USD) for filtering
+                if (filters.minPrice) params.append('minPrice', Number(filters.minPrice) / region.multiplier);
+                if (filters.maxPrice) params.append('maxPrice', Number(filters.maxPrice) / region.multiplier);
+
+                if (filters.ageGroup && filters.ageGroup !== 'All') params.append('ageGroup', filters.ageGroup);
+
+                const { data } = await axios.get(`http://localhost:5001/api/rackets?${params.toString()}`);
                 setRackets(data);
                 setLoading(false);
             } catch (err) {
+                console.error(err);
                 setError('Failed to load rackets. Please ensure the backend is running.');
                 setLoading(false);
             }
         };
 
-        fetchRackets();
-    }, []);
+        // Debounce fetch for better UX
+        const timeoutId = setTimeout(() => {
+            fetchRackets();
+        }, 300);
+
+        return () => clearTimeout(timeoutId);
+    }, [filters, region]);
+
+    // Update URL when filters change
+    useEffect(() => {
+        const params = {};
+        if (filters.series.length > 0) params.series = filters.series.join(',');
+        if (filters.minPrice) params.minPrice = filters.minPrice;
+        if (filters.maxPrice) params.maxPrice = filters.maxPrice;
+        if (filters.ageGroup && filters.ageGroup !== 'All') params.ageGroup = filters.ageGroup;
+        setSearchParams(params);
+    }, [filters, setSearchParams]);
 
     // Animation on Load
     useEffect(() => {
         if (!loading && rackets.length > 0) {
             const ctx = gsap.context(() => {
-                // Header Entrance
-                gsap.fromTo(headerRef.current.children,
-                    { y: 50, opacity: 0 },
-                    { y: 0, opacity: 1, duration: 1, stagger: 0.2, ease: "power3.out" }
-                );
-
-                // Grid Entrance
                 gsap.fromTo(".racket-card",
-                    { y: 100, opacity: 0, scale: 0.95 },
+                    { y: 50, opacity: 0 },
                     {
                         y: 0,
                         opacity: 1,
-                        scale: 1,
-                        duration: 0.8,
+                        duration: 0.6,
                         stagger: 0.05,
                         ease: "power2.out",
-                        delay: 0.5
+                        clearProps: "all"
                     }
                 );
-            }, containerRef);
-
+            }, gridRef);
             return () => ctx.revert();
         }
     }, [loading, rackets]);
 
-    // Extract unique models for categories
-    const categories = useMemo(() => {
-        const models = new Set(rackets.map(r => r.model));
-        return ['All', ...Array.from(models).sort()];
-    }, [rackets]);
-
-    // Filter products
-    const filteredRackets = useMemo(() => {
-        return rackets.filter(racket => {
-            const matchesCategory = activeCategory === 'All' || racket.model === activeCategory;
-            const matchesSearch = racket.name.toLowerCase().includes(searchQuery.toLowerCase());
-            return matchesCategory && matchesSearch;
+    // Handlers
+    const toggleSeries = (seriesName) => {
+        setFilters(prev => {
+            const newSeries = prev.series.includes(seriesName)
+                ? prev.series.filter(s => s !== seriesName)
+                : [...prev.series, seriesName];
+            return { ...prev, series: newSeries };
         });
-    }, [rackets, activeCategory, searchQuery]);
-
-    // Hover Animation Logic
-    const handleMouseEnter = (e) => {
-        const card = e.currentTarget;
-        const img = card.querySelector('.card-image');
-        const btn = card.querySelector('.buy-btn');
-
-        // Subtle Image Zoom
-        gsap.to(img, { scale: 1.08, duration: 0.6, ease: "power2.out" });
-        // Reveal Button
-        gsap.to(btn, { y: 0, opacity: 1, duration: 0.4, ease: "power2.out" });
     };
 
-    const handleMouseLeave = (e) => {
-        const card = e.currentTarget;
-        const img = card.querySelector('.card-image');
-        const btn = card.querySelector('.buy-btn');
-
-        // Reset
-        gsap.to(img, { scale: 1, duration: 0.6, ease: "power2.out" });
-        gsap.to(btn, { y: 20, opacity: 0, duration: 0.3 });
+    const handlePriceChange = (e) => {
+        const { name, value } = e.target;
+        setFilters(prev => ({ ...prev, [name]: value }));
     };
 
-    if (loading) return <div className="loader-container">Loading Collection...</div>;
-    if (error) return <div className="error-container">{error}</div>;
+    const handleCategoryChange = (cat) => {
+        setFilters(prev => ({ ...prev, ageGroup: cat }));
+    };
+
+    const clearFilters = () => {
+        setFilters({
+            series: [],
+            minPrice: '',
+            maxPrice: '',
+            ageGroup: 'All'
+        });
+    };
+
+    // Series Options
+    const seriesOptions = ["Blade", "Clash", "Pro Staff/RF", "Shift", "Ultra", "Other"];
 
     return (
         <section ref={containerRef} style={{
-            backgroundColor: '#F3F3F1', // Slight warmer grey/bone
+            backgroundColor: '#F7F7F5', // Light beige
             minHeight: '100vh',
-            paddingTop: '8rem',
-            paddingBottom: '8rem',
-            color: '#111',
-            backgroundImage: 'radial-gradient(circle at 50% 0%, #ffffff 0%, #F3F3F1 100%)',
-            fontFamily: 'var(--font-sans)'
+            paddingTop: '6rem',
+            paddingBottom: '6rem',
+            fontFamily: 'var(--font-sans)',
+            color: '#111'
         }}>
-            <div ref={headerRef} style={{ textAlign: 'center', marginBottom: '5rem', padding: '0 2rem' }}>
-                <span style={{
-                    display: 'block',
-                    fontSize: '0.85rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.2rem',
-                    marginBottom: '1rem',
-                    color: '#666',
-                    fontWeight: 600
-                }}>
-                    Official Store
-                </span>
-                <h2 style={{
+            <div className="section-header" style={{ padding: '0 2rem 4rem', textAlign: 'center' }}>
+                <h1 style={{
                     fontFamily: 'var(--font-serif)',
-                    fontSize: 'clamp(3.5rem, 6vw, 6rem)',
-                    lineHeight: 0.9,
-                    color: '#000',
-                    margin: 0,
-                    letterSpacing: '-0.03em'
-                }}>
-                    The Racket<br />Collection
-                </h2>
+                    fontSize: 'clamp(2.5rem, 4vw, 4rem)',
+                    color: '#051025',
+                    marginBottom: '0.5rem'
+                }}>Shop Rackets</h1>
+                <p style={{ color: '#666', fontSize: '1.1rem' }}>Find your perfect weapon.</p>
             </div>
 
-            {/* Sticky Filter Bar */}
-            <div style={{
-                position: 'sticky',
-                top: 'var(--header-height)',
-                zIndex: 90,
-                background: 'rgba(243, 243, 241, 0.9)',
-                backdropFilter: 'blur(10px)',
-                padding: '1.5rem 0',
-                marginBottom: '4rem',
-                borderBottom: '1px solid rgba(0,0,0,0.05)'
-            }}>
-                <div style={{
-                    maxWidth: '1400px',
-                    margin: '0 auto',
-                    padding: '0 2rem',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                    gap: '1rem'
-                }}>
-                    <div className="category-scroll" style={{
-                        display: 'flex',
-                        gap: '0.5rem',
-                        overflowX: 'auto',
-                        paddingBottom: '5px',
-                        scrollbarWidth: 'none',
-                        maskImage: 'linear-gradient(to right, black 90%, transparent 100%)'
-                    }}>
-                        {categories.map(cat => (
-                            <button key={cat}
-                                onClick={() => setActiveCategory(cat)}
-                                style={{
-                                    background: activeCategory === cat ? '#111' : 'transparent',
-                                    color: activeCategory === cat ? '#fff' : '#666',
-                                    border: `1px solid ${activeCategory === cat ? '#111' : '#ddd'} `,
-                                    padding: '0.6rem 1.4rem',
-                                    borderRadius: '100px',
-                                    cursor: 'pointer',
-                                    fontSize: '0.8rem',
-                                    fontWeight: 500,
-                                    whiteSpace: 'nowrap',
-                                    transition: 'all 0.3s ease'
-                                }}
-                            >
-                                {cat}
-                            </button>
+            <div className={`shop-container ${isMobileFilterOpen ? 'filters-open' : ''}`}>
+                {/* Mobile Filter Toggle */}
+                <button
+                    className="mobile-filter-toggle"
+                    onClick={() => setMobileFilterOpen(!isMobileFilterOpen)}
+                >
+                    {isMobileFilterOpen ? 'Close Filters' : 'Show Filters'}
+                </button>
+
+                {/* Sidebar */}
+                <aside className={`shop-sidebar ${isMobileFilterOpen ? 'open' : ''}`}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.2rem', fontFamily: 'var(--font-serif)', color: '#051025' }}>Filters</h3>
+                        <button
+                            onClick={clearFilters}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                textDecoration: 'underline',
+                                cursor: 'pointer',
+                                fontSize: '0.85rem',
+                                color: '#666'
+                            }}>
+                            Reset
+                        </button>
+                    </div>
+
+                    {/* Series Filter */}
+                    <div className="filter-group">
+                        <div className="filter-title">Racket Series</div>
+                        {seriesOptions.map(series => (
+                            <label key={series} className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    className="checkbox-input"
+                                    checked={filters.series.includes(series)}
+                                    onChange={() => toggleSeries(series)}
+                                />
+                                <span className="checkbox-visual"></span>
+                                {series}
+                            </label>
                         ))}
                     </div>
 
-                    <input
-                        type="text"
-                        placeholder="Search..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        style={{
-                            background: '#fff',
-                            border: '1px solid #ddd',
-                            padding: '0.6rem 1.5rem',
-                            borderRadius: '100px',
-                            width: '200px',
-                            fontSize: '0.9rem',
-                            outline: 'none',
-                            transition: 'width 0.3s ease'
-                        }}
-                        onFocus={(e) => e.target.style.width = '280px'}
-                        onBlur={(e) => e.target.style.width = '200px'}
-                    />
-                </div>
-            </div>
-
-            {/* Grid */}
-            <div ref={gridRef} style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                gap: '2rem',
-                maxWidth: '1800px',
-                margin: '0 auto',
-                padding: '0 2rem'
-            }}>
-                {filteredRackets.map((racket) => (
-                    <div
-                        key={racket._id}
-                        className="racket-card"
-                        onMouseEnter={handleMouseEnter}
-                        onMouseLeave={handleMouseLeave}
-                        onClick={() => navigate(`/rackets/${racket._id}`)}
-                        style={{
-                            background: 'transparent',
-                            borderRadius: '0',
-                            overflow: 'visible', // Allow content to flow
-                            position: 'relative',
-                            cursor: 'pointer',
-                            flexDirection: 'column',
-                            transformStyle: 'preserve-3d',
-                            opacity: 0 // Start hidden for GSAP to reveal
-                        }}
-                    >
-                        {/* Image Area - The Colored Box */}
-                        <div style={{
-                            width: '100%',
-                            aspectRatio: '0.85', // Tall portrait rectangle
-                            background: '#F4F4F4', // The Wilson Light Grey/Beige
-                            position: 'relative',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            marginBottom: '1rem',
-                            overflow: 'hidden'
-                        }}>
-                            {/* Badge - Top Left, Small & Clean */}
-                            <div className="card-badge" style={{
-                                position: 'absolute',
-                                top: '1rem',
-                                left: '1rem',
-                                background: '#FFF',
-                                color: '#111',
-                                padding: '0.2rem 0.6rem',
-                                fontSize: '0.7rem',
-                                fontWeight: 600,
-                                textTransform: 'uppercase',
-                                zIndex: 10,
-                                letterSpacing: '0.05em'
-                            }}>
-                                New
-                            </div>
-
-                            {racket.imageUrl ? (
-                                <img
-                                    src={racket.imageUrl}
-                                    alt={racket.name}
-                                    className="card-image"
-                                    style={{
-                                        maxWidth: '85%',
-                                        maxHeight: '85%',
-                                        objectFit: 'contain',
-                                        transform: 'rotate(0deg)', // Upright
-                                        filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.08))', // Subtle shadow
-                                        willChange: 'transform'
-                                    }}
-                                />
-                            ) : (
-                                <span style={{ fontSize: '4rem' }}>🏸</span>
-                            )}
-
-                            {/* Quick Add Overlay Button - Hidden by default */}
+                    {/* Player Category (Age Group) Filter */}
+                    <div className="filter-group">
+                        <div className="filter-title">Player Category</div>
+                        <div className="pill-group">
                             <button
-                                className="buy-btn"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onCheckout(racket);
-                                }}
-                                style={{
-                                    position: 'absolute',
-                                    bottom: '1.5rem',
-                                    left: '50%',
-                                    transform: 'translateX(-50%) translateY(20px)',
-                                    background: '#111',
-                                    color: '#fff',
-                                    border: 'none',
-                                    padding: '0.8rem 2rem',
-                                    borderRadius: '100px',
-                                    fontWeight: 600,
-                                    fontFamily: 'var(--font-sans)',
-                                    fontSize: '0.8rem',
-                                    textTransform: 'uppercase',
-                                    cursor: 'pointer',
-                                    opacity: 0,
-                                    whiteSpace: 'nowrap',
-                                    transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)'
-                                }}
+                                className={`filter-pill ${filters.ageGroup === 'All' ? 'active' : ''}`}
+                                onClick={() => handleCategoryChange('All')}
                             >
-                                Quick Add
+                                All
+                            </button>
+                            <button
+                                className={`filter-pill ${filters.ageGroup === 'Adult' ? 'active' : ''}`}
+                                onClick={() => handleCategoryChange('Adult')}
+                            >
+                                Adult
+                            </button>
+                            <button
+                                className={`filter-pill ${filters.ageGroup === 'Junior' ? 'active' : ''}`}
+                                onClick={() => handleCategoryChange('Junior')}
+                            >
+                                Junior
                             </button>
                         </div>
+                    </div>
 
-                        {/* Content Area - Below Image, Clean */}
-                        <div style={{
-                            padding: '0',
-                            textAlign: 'left' // Explicit left align
-                        }}>
-                            <h3 style={{
-                                fontFamily: 'var(--font-sans)', // Wilson uses clean sans for list items often
-                                fontSize: '1rem',
-                                fontWeight: 600,
-                                color: '#111',
-                                margin: '0 0 0.5rem 0',
-                                lineHeight: 1.4,
-                                height: 'auto'
-                            }}>{racket.name}</h3>
-
+                    {/* Price Filter */}
+                    <div className="filter-group">
+                        <div className="filter-title">Price Range</div>
+                        <div className="price-inputs">
+                            <input
+                                type="number"
+                                name="minPrice"
+                                placeholder="Min"
+                                value={filters.minPrice}
+                                onChange={handlePriceChange}
+                                className="price-field"
+                                min="0"
+                            />
+                            <span style={{ alignSelf: 'center', color: '#999' }}>-</span>
+                            <input
+                                type="number"
+                                name="maxPrice"
+                                placeholder="Max"
+                                value={filters.maxPrice}
+                                onChange={handlePriceChange}
+                                className="price-field"
+                                min="0"
+                            />
+                        </div>
+                        {/* Simple slider visual (non-functional/decorative for this iteration since standard <input range> logic is complex for dual handles without libs) */}
+                        <div className="range-slider">
                             <div style={{
-                                fontSize: '0.9rem',
-                                fontWeight: 500,
-                                color: '#111'
-                            }}>
-                                {region.currencySymbol}{Math.round(racket.price * region.multiplier).toLocaleString()}.00
-                            </div>
+                                position: 'absolute',
+                                left: '0%',
+                                right: '0%',
+                                height: '100%',
+                                background: '#ccc'
+                            }}></div>
+                            <div style={{
+                                position: 'absolute',
+                                left: `${Math.min(((filters.minPrice || 0) / 300) * 100, 100)}%`,
+                                right: `${100 - Math.min(((filters.maxPrice || 300) / 300) * 100, 100)}%`,
+                                height: '100%',
+                                background: '#051025'
+                            }}></div>
                         </div>
                     </div>
-                ))}
-            </div>
+                </aside>
 
-            {filteredRackets.length === 0 && (
-                <div style={{ textAlign: 'center', padding: '6rem', color: '#999', fontSize: '1.2rem', fontWeight: 300 }}>
-                    No weapons match your criteria.
+                {/* Product Grid */}
+                <div className="shop-main">
+                    {loading ? (
+                        <div className="shop-loader">
+                            Loading specialized equipment...
+                        </div>
+                    ) : error ? (
+                        <div className="error-container">{error}</div>
+                    ) : (
+                        <>
+                            <div style={{ marginBottom: '1rem', fontSize: '0.9rem', color: '#666' }}>
+                                Showing {rackets.length} results
+                            </div>
+
+                            {rackets.length === 0 ? (
+                                <div style={{ textAlign: 'center', padding: '4rem', color: '#666' }}>
+                                    No rackets found matching your filters.
+                                    <br />
+                                    <button onClick={clearFilters} style={{ marginTop: '1rem', background: '#051025', color: '#fff', padding: '0.5rem 1rem', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Clear Filters</button>
+                                </div>
+                            ) : (
+                                <div ref={gridRef} className="shop-grid">
+                                    {rackets.map((racket) => (
+                                        <div
+                                            key={racket._id}
+                                            className="racket-card"
+                                            onClick={() => navigate(`/rackets/${racket._id}`)}
+                                            style={{
+                                                background: '#fff',
+                                                borderRadius: '8px',
+                                                overflow: 'hidden',
+                                                cursor: 'pointer',
+                                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+                                                transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.transform = 'translateY(-8px)';
+                                                e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)';
+                                            }}
+                                        >
+                                            {/* Image Area */}
+                                            <div style={{
+                                                background: '#fcfcf7', // Slightly off-white
+                                                padding: '2rem',
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                position: 'relative'
+                                            }}>
+                                                {/* Badge */}
+                                                {racket.name.includes('V9') || racket.name.includes('V14') ? (
+                                                    <span style={{
+                                                        position: 'absolute',
+                                                        top: '12px',
+                                                        left: '12px',
+                                                        background: '#051025',
+                                                        color: '#fff',
+                                                        fontSize: '0.7rem',
+                                                        fontWeight: 'bold',
+                                                        padding: '4px 8px',
+                                                        borderRadius: '4px',
+                                                        letterSpacing: '0.05em'
+                                                    }}>NEW</span>
+                                                ) : null}
+
+                                                <img
+                                                    src={racket.imageUrl}
+                                                    alt={racket.name}
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '250px',
+                                                        objectFit: 'contain',
+                                                        filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.1))',
+                                                        transition: 'transform 0.4s ease'
+                                                    }}
+                                                />
+                                            </div>
+
+                                            {/* Content Area */}
+                                            <div style={{ padding: '1.5rem' }}>
+                                                <div style={{
+                                                    fontSize: '0.75rem',
+                                                    color: '#888',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '0.05em',
+                                                    marginBottom: '0.5rem'
+                                                }}>
+                                                    {racket.model} Series
+                                                </div>
+                                                <h3 style={{
+                                                    fontSize: '1.1rem',
+                                                    fontWeight: '600',
+                                                    color: '#051025',
+                                                    marginBottom: '0.5rem',
+                                                    lineHeight: '1.4',
+                                                    minHeight: '2.8em' // 2 lines
+                                                }}>
+                                                    {racket.name}
+                                                </h3>
+                                                <div style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                    marginTop: '1rem'
+                                                }}>
+                                                    <span style={{
+                                                        fontSize: '1.1rem',
+                                                        fontWeight: '700',
+                                                        color: '#051025'
+                                                    }}>
+
+                                                        {region.currencySymbol} {Math.round(racket.price * region.multiplier).toLocaleString()}
+                                                    </span>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onCheckout(racket);
+                                                        }}
+                                                        style={{
+                                                            background: 'transparent',
+                                                            border: '1px solid #111',
+                                                            color: '#111',
+                                                            padding: '0.4rem 1rem',
+                                                            borderRadius: '100px',
+                                                            fontSize: '0.8rem',
+                                                            fontWeight: '600',
+                                                            cursor: 'pointer',
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                        onMouseEnter={(e) => {
+                                                            e.currentTarget.style.background = '#111';
+                                                            e.currentTarget.style.color = '#fff';
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.currentTarget.style.background = 'transparent';
+                                                            e.currentTarget.style.color = '#111';
+                                                        }}
+                                                    >
+                                                        Add to Cart
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </>
+                    )}
                 </div>
-            )}
+            </div>
         </section>
     );
 };

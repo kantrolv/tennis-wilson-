@@ -18,8 +18,14 @@ export default function Experience() {
     const ambientIntensity = 0.93;
     const environmentStart = 0.12;
 
+    const smoothProgress = useRef(0);
+
     useFrame((state, delta) => {
-        const p = scrollState.progress;
+        // Even if the user scrolls infinitely fast, the animation plays out at a max speed defined by lambda.
+        // Lower lambda means "smoother" / slower catch-up.
+        const timeLambda = 0.7;
+        smoothProgress.current = damp(smoothProgress.current, scrollState.progress, timeLambda, delta);
+        const p = smoothProgress.current;
 
         // -- Choreography Targets --
 
@@ -124,14 +130,28 @@ export default function Experience() {
                 // Spin
                 bRot.x = Math.PI * 4 + (tSwing * Math.PI * 2);
 
-                // User requested Royal Blue for main site match
+                // User requested Beige for next part
                 if (p > 0.65) {
-                    // > 65%: Royal Blue BG
-                    state.scene.background.setHex(0x051025);
+                    // > 65%: Beige BG
+                    state.scene.background.setHex(0xF5F5DC);
                     bScale.set(0, 0, 0);
+
+                    // Sync Header Color: Black on Beige
+                    const header = document.querySelector('header');
+                    if (header) {
+                        header.style.color = '#000000';
+                        header.style.mixBlendMode = 'normal';
+                    }
                 } else {
                     // 50-65%: Dark BG
                     state.scene.background.setHex(0x050505);
+
+                    // Sync Header Color: Ivory on Dark
+                    const header = document.querySelector('header');
+                    if (header) {
+                        header.style.color = 'var(--c-ivory)';
+                        header.style.mixBlendMode = 'difference';
+                    }
                 }
             }
 
@@ -143,47 +163,57 @@ export default function Experience() {
             rRot.x = -Math.PI / 2 + 0.2;
             rPos.z = -10;
 
-            // p > 0.75 is > 70% -> Always Royal Blue / Ball Gone
-            state.scene.background.setHex(0x051025);
+            // p > 0.75 is > 70% -> Always Beige / Ball Gone
+            state.scene.background.setHex(0xF5F5DC);
             bScale.set(0, 0, 0);
             bPos.z = 15; // Just in case, keep z high
+
+            // Sync Header Color: Black on Beige
+            const header = document.querySelector('header');
+            if (header) {
+                header.style.color = '#000000';
+                header.style.mixBlendMode = 'normal';
+            }
         } else {
-            // Reset BG for other phases
+            // Reset BG for other phases (< 35% or whatever fallback)
             state.scene.background.setHex(0x050505);
+
+            // Sync Header Color: Ivory on Dark
+            const header = document.querySelector('header');
+            if (header) {
+                header.style.color = 'var(--c-ivory)';
+                header.style.mixBlendMode = 'difference';
+            }
         }
 
-        // Apply Damping
-        // Dynamic Lambda: Smooth (1.5) when slow, Snappy (10+) when fast.
-        // This ensures the ball doesn't get "left behind" during fast scrolls.
-        const velocity = Math.abs(scrollState.velocity || 0);
-        const baseLambda = 1.5;
-        const dynamicLambda = velocity > 50 ? 12.0 : (velocity > 20 ? 6.0 : baseLambda);
-
-        // Use the higher value to keep up with user input
-        const lambda = dynamicLambda;
+        // Apply Damping to VECTORS
+        // Since we damped 'p' (Time), we want the objects to follow the calculated position TIGHTLY.
+        // If we damp here too loosely, we get "double damping" which feels muddy.
+        // We use a high lambda (20) so it feels solid but filters micro-jitter.
+        const vectorLambda = 20.0;
 
         if (racketRef.current) {
-            racketRef.current.position.x = damp(racketRef.current.position.x, rPos.x, lambda, delta);
-            racketRef.current.position.y = damp(racketRef.current.position.y, rPos.y, lambda, delta);
-            racketRef.current.position.z = damp(racketRef.current.position.z, rPos.z, lambda, delta);
+            racketRef.current.position.x = damp(racketRef.current.position.x, rPos.x, vectorLambda, delta);
+            racketRef.current.position.y = damp(racketRef.current.position.y, rPos.y, vectorLambda, delta);
+            racketRef.current.position.z = damp(racketRef.current.position.z, rPos.z, vectorLambda, delta);
 
-            racketRef.current.rotation.x = damp(racketRef.current.rotation.x, rRot.x, lambda, delta);
-            racketRef.current.rotation.y = damp(racketRef.current.rotation.y, rRot.y, lambda, delta);
-            racketRef.current.rotation.z = damp(racketRef.current.rotation.z, rRot.z, lambda, delta);
+            racketRef.current.rotation.x = damp(racketRef.current.rotation.x, rRot.x, vectorLambda, delta);
+            racketRef.current.rotation.y = damp(racketRef.current.rotation.y, rRot.y, vectorLambda, delta);
+            racketRef.current.rotation.z = damp(racketRef.current.rotation.z, rRot.z, vectorLambda, delta);
         }
 
         if (ballRef.current) {
-            ballRef.current.position.x = damp(ballRef.current.position.x, bPos.x, lambda, delta);
-            ballRef.current.position.y = damp(ballRef.current.position.y, bPos.y, lambda, delta);
-            ballRef.current.position.z = damp(ballRef.current.position.z, bPos.z, lambda, delta);
+            ballRef.current.position.x = damp(ballRef.current.position.x, bPos.x, vectorLambda, delta);
+            ballRef.current.position.y = damp(ballRef.current.position.y, bPos.y, vectorLambda, delta);
+            ballRef.current.position.z = damp(ballRef.current.position.z, bPos.z, vectorLambda, delta);
 
-            ballRef.current.scale.x = damp(ballRef.current.scale.x, bScale.x, lambda, delta);
-            ballRef.current.scale.y = damp(ballRef.current.scale.y, bScale.y, lambda, delta);
-            ballRef.current.scale.z = damp(ballRef.current.scale.z, bScale.z, lambda, delta);
+            ballRef.current.scale.x = damp(ballRef.current.scale.x, bScale.x, vectorLambda, delta);
+            ballRef.current.scale.y = damp(ballRef.current.scale.y, bScale.y, vectorLambda, delta);
+            ballRef.current.scale.z = damp(ballRef.current.scale.z, bScale.z, vectorLambda, delta);
 
-            ballRef.current.rotation.x = damp(ballRef.current.rotation.x, bRot.x, lambda, delta);
-            ballRef.current.rotation.y = damp(ballRef.current.rotation.y, bRot.y, lambda, delta);
-            ballRef.current.rotation.z = damp(ballRef.current.rotation.z, bRot.z, lambda, delta);
+            ballRef.current.rotation.x = damp(ballRef.current.rotation.x, bRot.x, vectorLambda, delta);
+            ballRef.current.rotation.y = damp(ballRef.current.rotation.y, bRot.y, vectorLambda, delta);
+            ballRef.current.rotation.z = damp(ballRef.current.rotation.z, bRot.z, vectorLambda, delta);
         }
     });
 

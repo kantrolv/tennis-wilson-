@@ -1,0 +1,214 @@
+/* Shop Layout */
+.shop-container {
+    display: flex;
+    max-width: var(--container-width, 1400px);
+    margin: 0 auto;
+    padding: 0 2rem;
+    gap: 3rem;
+    position: relative;
+}
+
+.shop-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 120px;
+    height: fit-content;
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
+    padding-right: 1rem;
+    /* Scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: #ddd transparent;
+}
+
+.shop-sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.shop-sidebar::-webkit-scrollbar-thumb {
+    background-color: #ddd;
+    border-radius: 4px;
+}
+
+.shop-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+@media (max-width: 1024px) {
+    .shop-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .shop-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Filter Sections */
+.filter-group {
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding-bottom: 2rem;
+}
+
+.filter-group:last-child {
+    border-bottom: none;
+}
+
+.filter-title {
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1.2rem;
+    color: #111;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Checkbox Style */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: #555;
+    transition: color 0.2s;
+}
+
+.checkbox-label:hover {
+    color: #000;
+}
+
+.checkbox-visual {
+    width: 18px;
+    height: 18px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.checkbox-input {
+    display: none;
+}
+
+.checkbox-input:checked+.checkbox-visual {
+    background: #111;
+    border-color: #111;
+}
+
+.checkbox-input:checked+.checkbox-visual::after {
+    content: '✓';
+    color: #fff;
+    font-size: 12px;
+}
+
+/* Radio / Pill Style */
+.pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.filter-pill {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    background: transparent;
+    transition: all 0.2s;
+}
+
+.filter-pill.active {
+    background: #111;
+    color: #fff;
+    border-color: #111;
+}
+
+/* Range Slider */
+.price-inputs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.price-field {
+    flex: 1;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    color: #111;
+}
+
+.range-slider {
+    width: 100%;
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+    position: relative;
+    margin-top: 1rem;
+}
+
+/* Mobile Filter Toggle */
+.mobile-filter-toggle {
+    display: none;
+    width: 100%;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    padding: 1rem;
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .shop-sidebar {
+        display: none;
+        /* Hidden by default on mobile, needs toggle logic */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: #F7F7F5;
+        z-index: 1000;
+        padding: 2rem;
+        max-height: 100vh;
+    }
+
+    .shop-sidebar.open {
+        display: block;
+    }
+
+    .mobile-filter-toggle {
+        display: block;
+    }
+}
+
+/* Loading State */
+.shop-loader {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem;
+    color: #888;
+    font-style: italic;
+}

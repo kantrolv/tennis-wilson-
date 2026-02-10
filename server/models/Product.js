@@ -25,6 +25,12 @@ const productSchema = mongoose.Schema({
         required: true,
         default: 'racket'
     },
+    ageGroup: {
+        type: String,
+        required: true,
+        default: 'Adult',
+        enum: ['Adult', 'Junior']
+    },
     sport: {
         type: String,
         required: true,

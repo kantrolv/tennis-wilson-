@@ -30,23 +30,17 @@ const Home = () => {
 
             {/* The Scrollable Area */}
             <div className="scroll-container">
-                {/* Spacer for 3D Intro Animation */}
-                <div className="cinematic-spacer" style={{ height: '400vh' }}></div>
+                {/* Spacer for 3D Intro Animation - Increased to 600vh to allow smooth animation to finish before content properly appears */}
+                <div className="cinematic-spacer" style={{ height: '600vh' }}></div>
 
-                {/* Main Website Content */}
-                <div style={{ position: 'relative', zIndex: 20, backgroundColor: 'var(--c-bg-main)' }}>
+                {/* Restore Header/Footer via Layout, but keep body content empty as requested */}
+                <div style={{ position: 'relative', zIndex: 20, color: 'var(--c-royal-blue)' }}>
                     <Layout>
-                        <RacketHero />
-                        <RacketStrings />
-                        <FrameMaterial />
-                        <Performance />
-                        <LegacyPlayers />
-                        <CurrentPlayers />
+                        {/* Content Removed */}
                     </Layout>
                 </div>
             </div>
 
-            <HTMLOverlay />
             <div className="grain-overlay" />
             <Loader />
         </>

@@ -3,15 +3,21 @@ import React, { createContext, useContext, useState } from 'react';
 const RegionContext = createContext();
 
 export const RegionProvider = ({ children }) => {
-    // Default: US, English, USD
-    const [region, setRegion] = useState({
-        countryCode: 'US',
-        countryName: 'United States',
-        language: 'English',
-        currency: 'USD',
-        currencySymbol: '$',
-        multiplier: 1
+    // Default: US, English, USD, potentially loaded from localStorage
+    const [region, setRegion] = useState(() => {
+        const savedRegion = localStorage.getItem('cinematic-tennis-region');
+        return savedRegion ? JSON.parse(savedRegion) : {
+            countryCode: 'US',
+            countryName: 'United States',
+            language: 'English',
+            currency: 'USD',
+            currencySymbol: '$',
+            multiplier: 1
+        };
     });
+
+    const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+    const [subsequentAction, setSubsequentAction] = useState(null);
 
     const regions = [
         { code: 'US', name: 'United States', lang: 'English', curr: 'USD', symbol: '$', mult: 1 },
@@ -26,19 +32,44 @@ export const RegionProvider = ({ children }) => {
     const changeRegion = (countryCode) => {
         const found = regions.find(r => r.code === countryCode);
         if (found) {
-            setRegion({
+            const newRegion = {
                 countryCode: found.code,
                 countryName: found.name,
                 language: found.lang,
                 currency: found.curr,
                 currencySymbol: found.symbol,
                 multiplier: found.mult
-            });
+            };
+            setRegion(newRegion);
+            localStorage.setItem('cinematic-tennis-region', JSON.stringify(newRegion));
+
+            // Execute subsequent action if one was queued (e.g., navigation)
+            if (subsequentAction) {
+                subsequentAction();
+                setSubsequentAction(null);
+            }
         }
     };
 
+    const openSelector = (action = null) => {
+        if (action) setSubsequentAction(() => action);
+        setIsSelectorOpen(true);
+    };
+
+    const closeSelector = () => {
+        setIsSelectorOpen(false);
+        setSubsequentAction(null);
+    };
+
     return (
-        <RegionContext.Provider value={{ region, changeRegion, regions }}>
+        <RegionContext.Provider value={{
+            region,
+            changeRegion,
+            regions,
+            isSelectorOpen,
+            openSelector,
+            closeSelector
+        }}>
             {children}
         </RegionContext.Provider>
     );

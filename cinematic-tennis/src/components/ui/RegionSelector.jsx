@@ -1,15 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useRegion } from '../../context/RegionContext';
 
 const RegionSelector = () => {
-    const { region, changeRegion, regions } = useRegion();
-    const [isOpen, setIsOpen] = useState(false);
+    const { region, changeRegion, regions, isSelectorOpen, openSelector, closeSelector } = useRegion();
 
     return (
         <>
             {/* Trigger Icon */}
             <button
-                onClick={() => setIsOpen(true)}
+                onClick={() => openSelector()}
                 title="Change Region/Language"
                 style={{
                     background: 'transparent',
@@ -31,7 +30,7 @@ const RegionSelector = () => {
             </button>
 
             {/* Modal */}
-            {isOpen && (
+            {isSelectorOpen && (
                 <div style={{
                     position: 'fixed',
                     top: 0,
@@ -46,7 +45,7 @@ const RegionSelector = () => {
                     justifyContent: 'center',
                     animation: 'fadeIn 0.3s ease-out'
                 }}
-                    onClick={() => setIsOpen(false)} // Close on background click
+                    onClick={() => closeSelector()} // Close on background click
                 >
                     <div
                         className="glass-panel"
@@ -64,7 +63,7 @@ const RegionSelector = () => {
                     >
                         {/* Close Button */}
                         <button
-                            onClick={() => setIsOpen(false)}
+                            onClick={() => closeSelector()}
                             style={{
                                 position: 'absolute',
                                 top: '1.5rem',
@@ -94,7 +93,7 @@ const RegionSelector = () => {
                                     key={r.code}
                                     onClick={() => {
                                         changeRegion(r.code);
-                                        setIsOpen(false);
+                                        closeSelector();
                                     }}
                                     style={{
                                         background: region.countryCode === r.code ? 'var(--c-gold-dim)' : 'rgba(255,255,255,0.05)',
