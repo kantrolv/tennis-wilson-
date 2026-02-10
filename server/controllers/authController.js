@@ -13,7 +13,8 @@ const authUser = asyncHandler(async (req, res) => {
     if (user && (await user.matchPassword(password))) {
         res.json({
             _id: user._id,
-            username: user.username,
+            _id: user._id,
+            name: user.name,
             email: user.email,
             role: user.role,
             isAdmin: user.isAdmin,
@@ -29,7 +30,7 @@ const authUser = asyncHandler(async (req, res) => {
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-    const { username, email, password, role } = req.body;
+    const { name, email, password, role } = req.body;
 
     const userExists = await User.findOne({ email });
 
@@ -39,7 +40,7 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 
     const user = await User.create({
-        username,
+        name,
         email,
         password,
         role: role || 'user'
@@ -48,7 +49,8 @@ const registerUser = asyncHandler(async (req, res) => {
     if (user) {
         res.status(201).json({
             _id: user._id,
-            username: user.username,
+            _id: user._id,
+            name: user.name,
             email: user.email,
             role: user.role,
             isAdmin: user.isAdmin,
@@ -60,7 +62,22 @@ const registerUser = asyncHandler(async (req, res) => {
     }
 });
 
+// @desc    Get user profile
+// @route   GET /api/auth/me
+// @access  Private
+const getMe = asyncHandler(async (req, res) => {
+    const user = {
+        _id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role,
+        isAdmin: req.user.isAdmin,
+    }
+    res.status(200).json(user)
+});
+
 module.exports = {
     authUser,
     registerUser,
+    getMe,
 };

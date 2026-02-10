@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import RegionSelector from '../ui/RegionSelector';
-
+import AuthContext from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 
 const Header = () => {
   const { cartCount, setIsCartOpen } = useCart();
+  const { user, logout } = useContext(AuthContext);
+
+  const handleLogout = () => {
+    logout();
+    window.location.href = '/'; // Force redirect to home
+  };
 
   return (
     <header style={{
@@ -23,14 +29,16 @@ const Header = () => {
       color: 'var(--c-ivory)'
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
-        <div className="logo" style={{
+        <Link to="/" className="logo" style={{
+          textDecoration: 'none',
+          color: 'inherit',
           fontFamily: 'var(--font-serif)',
           fontSize: '1.5rem',
           fontWeight: 700,
           letterSpacing: '0.1em'
         }}>
           WILSON
-        </div>
+        </Link>
 
         <nav style={{ display: 'flex', gap: '2rem' }}>
           <Link to="/" style={{
@@ -58,18 +66,52 @@ const Header = () => {
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
         <RegionSelector />
-        <a href="/auth" style={{
-          textDecoration: 'none',
-          color: 'inherit',
-          fontFamily: 'var(--font-sans)',
-          fontSize: '0.9rem',
-          textTransform: 'uppercase',
-          border: '1px solid currentColor',
-          padding: '0.5rem 1rem',
-          borderRadius: '2rem'
-        }}>
-          Login
-        </a>
+
+        {user ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <Link to="/profile" style={{
+              textDecoration: 'none',
+              color: 'inherit',
+              fontFamily: 'var(--font-sans)',
+              fontSize: '0.9rem',
+              textTransform: 'uppercase',
+              border: '1px solid currentColor',
+              padding: '0.5rem 1rem',
+              borderRadius: '2rem'
+            }}>
+              {user.name}
+            </Link>
+            <button
+              onClick={handleLogout}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'inherit',
+                fontFamily: 'var(--font-sans)',
+                fontSize: '0.8rem',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                opacity: 0.8
+              }}
+            >
+              Logout
+            </button>
+          </div>
+        ) : (
+          <Link to="/login" style={{
+            textDecoration: 'none',
+            color: 'inherit',
+            fontFamily: 'var(--font-sans)',
+            fontSize: '0.9rem',
+            textTransform: 'uppercase',
+            border: '1px solid currentColor',
+            padding: '0.5rem 1rem',
+            borderRadius: '2rem'
+          }}>
+            Login
+          </Link>
+        )}
+
         <div
           className="cart-icon"
           onClick={() => setIsCartOpen(true)}

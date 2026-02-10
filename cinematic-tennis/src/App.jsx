@@ -9,6 +9,14 @@ import ReactLenis from "lenis/react";
 import gsap from "gsap";
 import { RegionProvider } from "./context/RegionContext";
 import { CartProvider } from "./context/CartContext";
+import { AuthProvider } from "./context/AuthContext";
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import "./styles/Auth.css";
+import Profile from './pages/Profile';
+import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   const lenisRef = useRef();
@@ -26,20 +34,41 @@ function App() {
   }, []);
 
   return (
-    <RegionProvider>
-      <CartProvider>
-        <Router>
-          <ReactLenis root ref={lenisRef} autoRaf={false}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/rackets" element={<Rackets />} />
-              <Route path="/rackets/:id" element={<ProductDetails />} />
-              <Route path="/auth" element={<Auth />} />
-            </Routes>
-          </ReactLenis>
-        </Router>
-      </CartProvider>
-    </RegionProvider>
+    <AuthProvider>
+      <RegionProvider>
+        <CartProvider>
+          <Router>
+            <ReactLenis root ref={lenisRef} autoRaf={false}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/rackets" element={<Rackets />} />
+                <Route path="/rackets/:id" element={<ProductDetails />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+
+                {/* Protected Routes */}
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } />
+                <Route path="/cart" element={
+                  <ProtectedRoute>
+                    <Cart />
+                  </ProtectedRoute>
+                } />
+                <Route path="/checkout" element={
+                  <ProtectedRoute>
+                    <Checkout />
+                  </ProtectedRoute>
+                } />
+              </Routes>
+            </ReactLenis>
+          </Router>
+        </CartProvider>
+      </RegionProvider>
+    </AuthProvider>
   );
 }
 
