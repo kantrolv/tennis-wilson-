@@ -1,16 +1,19 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import axios from 'axios';
 import { useRegion } from '../../context/RegionContext';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import '../../styles/Shop.css';
+import { useAuth } from '../../context/AuthContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const RacketCatalog = ({ onCheckout }) => {
     const { region } = useRegion();
     const navigate = useNavigate();
+    const location = useLocation();
+    const { user } = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
 
     const [rackets, setRackets] = useState([]);
@@ -378,7 +381,12 @@ const RacketCatalog = ({ onCheckout }) => {
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            onCheckout(racket);
+                                                            if (!user) {
+                                                                navigate('/login', { state: { from: location } });
+                                                                return;
+                                                            }
+                                                            // Instead of immediate checkout, go to details page to select options
+                                                            navigate(`/rackets/${racket._id}`);
                                                         }}
                                                         style={{
                                                             background: 'transparent',

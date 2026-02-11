@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useCart } from '../../context/CartContext';
 import { useRegion } from '../../context/RegionContext';
 import gsap from 'gsap';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const CartSidebar = () => {
     const {
@@ -16,6 +16,7 @@ const CartSidebar = () => {
     } = useCart();
 
     const { region } = useRegion();
+    const navigate = useNavigate();
     const sidebarRef = useRef(null);
     const overlayRef = useRef(null);
 
@@ -232,18 +233,23 @@ const CartSidebar = () => {
                             <span>Total</span>
                             <span>{fmtPrice(cartTotal)}</span>
                         </div>
-                        <button style={{
-                            width: '100%',
-                            padding: '1.2rem',
-                            background: '#111',
-                            color: '#fff',
-                            border: 'none',
-                            textTransform: 'uppercase',
-                            fontWeight: 700,
-                            letterSpacing: '0.1em',
-                            cursor: 'pointer',
-                            fontSize: '0.9rem'
-                        }}>
+                        <button
+                            onClick={() => {
+                                handleClose();
+                                navigate('/checkout');
+                            }}
+                            style={{
+                                width: '100%',
+                                padding: '1.2rem',
+                                background: '#111',
+                                color: '#fff',
+                                border: 'none',
+                                textTransform: 'uppercase',
+                                fontWeight: 700,
+                                letterSpacing: '0.1em',
+                                cursor: 'pointer',
+                                fontSize: '0.9rem'
+                            }}>
                             Checkout
                         </button>
                     </div>

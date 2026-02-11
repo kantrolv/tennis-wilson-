@@ -1,14 +1,14 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import RegionSelector from '../ui/RegionSelector';
+
 import AuthContext from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
-import { useRegion } from '../../context/RegionContext';
+
 
 const Header = () => {
   const { cartCount, setIsCartOpen } = useCart();
   const { user, logout } = useContext(AuthContext);
-  const { openSelector } = useRegion();
+
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -18,7 +18,7 @@ const Header = () => {
 
   const handleRacketsClick = (e) => {
     e.preventDefault();
-    openSelector(() => navigate('/rackets'));
+    navigate('/rackets');
   };
 
   return (
@@ -74,7 +74,7 @@ const Header = () => {
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-        <RegionSelector />
+
 
         {user ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

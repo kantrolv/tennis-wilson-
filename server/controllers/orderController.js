@@ -9,7 +9,8 @@ const Product = require('../models/Product'); // Ensure Product is imported
 const addOrderItems = asyncHandler(async (req, res) => {
     const {
         orderItems,
-        totalPrice
+        totalPrice,
+        shippingAddress
     } = req.body;
 
     if (orderItems && orderItems.length === 0) {
@@ -48,6 +49,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
             user: req.user._id,
             orderItems,
             totalPrice,
+            shippingAddress,
             isDemo: true,
             isPaid: true
         });

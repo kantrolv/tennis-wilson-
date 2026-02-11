@@ -18,6 +18,7 @@ const authUser = asyncHandler(async (req, res) => {
             email: user.email,
             role: user.role,
             isAdmin: user.isAdmin,
+            addresses: user.addresses,
             token: generateToken(user._id),
         });
     } else {
@@ -54,6 +55,7 @@ const registerUser = asyncHandler(async (req, res) => {
             email: user.email,
             role: user.role,
             isAdmin: user.isAdmin,
+            addresses: user.addresses,
             token: generateToken(user._id),
         });
     } else {
@@ -72,6 +74,7 @@ const getMe = asyncHandler(async (req, res) => {
         email: req.user.email,
         role: req.user.role,
         isAdmin: req.user.isAdmin,
+        addresses: req.user.addresses
     }
     res.status(200).json(user)
 });

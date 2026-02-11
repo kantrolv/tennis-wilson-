@@ -6,12 +6,23 @@ const orderSchema = mongoose.Schema({
         required: true,
         ref: 'User'
     },
+    shippingAddress: {
+        fullName: { type: String, required: true },
+        phoneNumber: { type: String, required: true },
+        addressLine1: { type: String, required: true },
+        addressLine2: { type: String },
+        city: { type: String, required: true },
+        state: { type: String, required: true },
+        postalCode: { type: String, required: true },
+        country: { type: String, required: true },
+        label: { type: String }
+    },
     orderItems: [
         {
             name: { type: String, required: true },
             qty: { type: Number, required: true },
             gripSize: { type: String, required: true }, // Size stored in order
-            image: { type: String }, // optional, for display
+            imageUrl: { type: String }, // optional, for display
             price: { type: Number, required: true },
             product: {
                 type: mongoose.Schema.Types.ObjectId,

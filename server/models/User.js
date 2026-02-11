@@ -25,7 +25,21 @@ const userSchema = mongoose.Schema({
         required: true,
         enum: ['user', 'recruiter'],
         default: 'user'
-    }
+    },
+    addresses: [
+        {
+            label: { type: String, required: true }, // "Home", "Office", "Other"
+            fullName: { type: String, required: true },
+            phoneNumber: { type: String, required: true },
+            addressLine1: { type: String, required: true },
+            addressLine2: { type: String },
+            city: { type: String, required: true },
+            state: { type: String, required: true },
+            postalCode: { type: String, required: true },
+            country: { type: String, required: true },
+            isDefault: { type: Boolean, default: false }
+        }
+    ]
 }, {
     timestamps: true
 });
@@ -36,11 +50,12 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) {
-        next();
+        return next();
     }
 
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
+    next();
 });
 
 const User = mongoose.model('User', userSchema);

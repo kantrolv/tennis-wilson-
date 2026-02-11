@@ -1,15 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useNavigate, useLocation, useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useRegion } from '../context/RegionContext';
 import { useCart } from '../context/CartContext'; // Import Cart Hook
+import { useAuth } from '../context/AuthContext';
 import Layout from '../components/layout/Layout';
 import gsap from 'gsap';
 
 const ProductDetails = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
+    const location = useLocation();
     const { region } = useRegion();
     const { addToCart } = useCart(); // Use Cart
+    const { user } = useAuth();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -70,6 +74,11 @@ const ProductDetails = () => {
     }, [loading, product]);
 
     const handleAddToCart = () => {
+        if (!user) {
+            navigate('/login', { state: { from: location } });
+            return;
+        }
+
         if (!selectedGrip) {
             alert("Please select a grip size.");
             return;
@@ -237,7 +246,7 @@ const ProductDetails = () => {
                                         {selectedString ? selectedString.name : 'Select String...'}
                                     </span>
                                     <span style={{ color: '#000', fontWeight: 500 }}>
-                                        {selectedString && selectedString.price > 0 ? `+ $${selectedString.price}` : ''}
+                                        {selectedString && selectedString.price > 0 ? `+ ${region.currencySymbol}${Math.round(selectedString.price * region.multiplier).toLocaleString()}` : ''}
                                         <span style={{ marginLeft: '10px', fontSize: '0.8rem' }}>{isStringDropdownOpen ? '▲' : '▼'}</span>
                                     </span>
                                 </div>
@@ -275,7 +284,7 @@ const ProductDetails = () => {
                                                 onMouseLeave={(e) => selectedString?.id !== option.id && (e.currentTarget.style.background = '#fff')}
                                             >
                                                 <span>{option.name}</span>
-                                                <span style={{ color: '#000' }}>{option.price > 0 ? `+ $${option.price}` : 'Free'}</span>
+                                                <span style={{ color: '#000' }}>{option.price > 0 ? `+ ${region.currencySymbol}${Math.round(option.price * region.multiplier).toLocaleString()}` : 'Free'}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -303,7 +312,7 @@ const ProductDetails = () => {
                                             }}
                                         >
                                             <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.3rem' }}>{option.name}</div>
-                                            <div style={{ fontSize: '0.8rem', color: '#000' }}>{option.price > 0 ? `+ $${option.price}` : 'Included'}</div>
+                                            <div style={{ fontSize: '0.8rem', color: '#000' }}>{option.price > 0 ? `+ ${region.currencySymbol}${Math.round(option.price * region.multiplier).toLocaleString()}` : 'Included'}</div>
                                         </div>
                                     ))}
                                 </div>
