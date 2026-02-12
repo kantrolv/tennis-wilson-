@@ -5,25 +5,29 @@ const User = require('../models/User');
 // @route   POST /api/users/address
 // @access  Private
 const addAddress = asyncHandler(async (req, res) => {
-    console.log("Adding address for user:", req.user._id);
+    // console.log("Adding address for user:", req.user._id);
     const user = await User.findById(req.user._id);
 
     if (user) {
         const { label, fullName, phoneNumber, addressLine1, addressLine2, city, state, postalCode, country, isDefault } = req.body;
-        console.log("Address payload:", req.body);
+        // console.log("Address payload:", req.body);
 
         const newAddress = {
             label,
             fullName,
             phoneNumber,
             addressLine1,
-            addressLine2,
+            addressLine2: addressLine2 || "", // Ensure it's not undefined
             city,
             state,
             postalCode,
             country,
-            isDefault
+            isDefault: isDefault || false // Ensure boolean
         };
+
+        if (!user.addresses) {
+            user.addresses = [];
+        }
 
         if (isDefault) {
             user.addresses.forEach(addr => {
@@ -33,10 +37,15 @@ const addAddress = asyncHandler(async (req, res) => {
 
         user.addresses.push(newAddress);
         console.log("Saving user with new address...");
-        const updatedUser = await user.save();
-        console.log("User saved successfully.");
-
-        res.json(updatedUser.addresses);
+        try {
+            const updatedUser = await user.save();
+            console.log("User saved successfully.");
+            res.json(updatedUser.addresses);
+        } catch (error) {
+            console.error("Error saving user address:", error);
+            res.status(500);
+            throw new Error('Failed to save address: ' + error.message);
+        }
     } else {
         res.status(404);
         throw new Error('User not found');

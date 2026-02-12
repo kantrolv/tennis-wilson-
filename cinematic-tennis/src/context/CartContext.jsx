@@ -55,12 +55,15 @@ export const CartProvider = ({ children }) => {
 
                     if (dbCartItems.length === 0 && cart.length > 0) {
                         // Push local to DB (First time sync)
-                        const cartItemsPayload = cart.map(item => ({
-                            ...item,
-                            qty: item.quantity,
-                            imageUrl: item.imageUrl || item.image,
-                            product: item.product || item._id
-                        }));
+                        const cartItemsPayload = cart.map(item => {
+                            const { _id, ...rest } = item;
+                            return {
+                                ...rest,
+                                qty: item.quantity,
+                                imageUrl: item.imageUrl || item.image,
+                                product: item.product || _id
+                            };
+                        });
                         const { data: updatedCart } = await axios.post('http://localhost:5001/api/cart/sync', { cartItems: cartItemsPayload }, config);
 
                         // Map back for state
@@ -110,14 +113,14 @@ export const CartProvider = ({ children }) => {
         // Prevent saving empty state over DB data before initialization is done
         if (!isInitialized) return;
 
-        if (!user) {
-            // Guest: Save to LocalStorage
-            try {
-                localStorage.setItem('wilson_cart', JSON.stringify(cart));
-            } catch (e) {
-                console.error("Failed to save cart to local storage", e);
-            }
-        } else {
+        // Any change to cart -> Persist to LocalStorage as backup
+        try {
+            localStorage.setItem('wilson_cart', JSON.stringify(cart));
+        } catch (e) {
+            console.error("Failed to save cart to local storage", e);
+        }
+
+        if (user) {
             // User: Save to Backend (Auto-save on every change)
             const saveToDb = async () => {
                 try {
@@ -126,22 +129,29 @@ export const CartProvider = ({ children }) => {
                     };
 
                     // Map frontend state (quantity) to backend schema (qty)
-                    const cartItemsPayload = cart.map(item => ({
-                        ...item,
-                        qty: item.quantity,
-                        imageUrl: item.imageUrl || item.image, // Fallback
-                        // Ensure required fields
-                        product: item.product || item._id
-                    }));
+                    const cartItemsPayload = cart.map(item => {
+                        // Strip _id to avoid duplicate key errors (Mongoose will generate unique subdoc IDs)
+                        const { _id, ...rest } = item;
+                        return {
+                            ...rest,
+                            qty: item.quantity,
+                            imageUrl: item.imageUrl || item.image, // Fallback
+                            // Ensure required fields
+                            product: item.product || _id
+                        };
+                    });
 
                     await axios.post('http://localhost:5001/api/cart/sync', { cartItems: cartItemsPayload }, config);
                 } catch (e) {
                     console.error("Failed to save cart to DB", e);
+                    // alert("Warning: Failed to save cart to server. Please check your connection."); 
+                    // Commented out alert to be less intrusive, but logged error is key. 
+                    // If severe, we can uncomment.
                 }
             };
             saveToDb();
         }
-    }, [cart, user, isInitialized]); // We include user to ensuring switching storage modes works, but isInitialized guards us.
+    }, [cart, user, isInitialized]);
 
     const addToCart = (product, options, quantity = 1) => {
         setCart(prevCart => {
