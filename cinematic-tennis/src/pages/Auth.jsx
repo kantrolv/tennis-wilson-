@@ -104,7 +104,6 @@ const Auth = () => {
                 zIndex: 0
             }} />
 
-            {/* Anti-Gravity Card */}
             <div className="auth-card" style={{
                 zIndex: 10,
                 width: '100%',
