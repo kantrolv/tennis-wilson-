@@ -35,9 +35,7 @@ const Home = () => {
 
                 {/* Restore Header/Footer via Layout, but keep body content empty as requested */}
                 <div style={{ position: 'relative', zIndex: 20, color: 'var(--c-royal-blue)' }}>
-                    <Layout>
-                        {/* Content Removed */}
-                    </Layout>
+
                 </div>
             </div>
 

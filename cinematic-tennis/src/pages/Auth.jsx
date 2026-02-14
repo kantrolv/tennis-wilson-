@@ -26,7 +26,7 @@ const Auth = () => {
         setLoading(true);
         setError(null);
 
-        // Basic validation
+
         if (!isLogin && formData.password !== formData.confirmPassword) {
             setError("Passwords do not match");
             setLoading(false);
