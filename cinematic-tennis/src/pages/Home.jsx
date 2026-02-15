@@ -30,13 +30,15 @@ const Home = () => {
 
             {/* The Scrollable Area */}
             <div className="scroll-container">
-                {/* Spacer for 3D Intro Animation - Increased to 600vh to allow smooth animation to finish before content properly appears */}
-                <div className="cinematic-spacer" style={{ height: '600vh' }}></div>
-
-                {/* Restore Header/Footer via Layout, but keep body content empty as requested */}
-                <div style={{ position: 'relative', zIndex: 20, color: 'var(--c-royal-blue)' }}>
-
-                </div>
+                <Layout>
+                    <div className="cinematic-spacer" style={{ height: '600vh' }}></div>
+                    <RacketHero />
+                    <RacketStrings />
+                    <FrameMaterial />
+                    <Performance />
+                    <LegacyPlayers />
+                    <CurrentPlayers />
+                </Layout>
             </div>
 
             <div className="grain-overlay" />
