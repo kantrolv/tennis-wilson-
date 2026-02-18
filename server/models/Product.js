@@ -65,11 +65,20 @@ const productSchema = mongoose.Schema({
         type: Number,
         required: true,
         default: 0 // Total stock cache
+    },
+    region: {
+        type: String,
+        required: true,
+        enum: ['india', 'usa', 'uk', 'uae']
     }
 }, {
     timestamps: true
 });
 
+// Index for fast region-filtered queries
+productSchema.index({ region: 1 });
+
 const Product = mongoose.model('Product', productSchema);
 
 module.exports = Product;
+

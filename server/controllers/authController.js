@@ -13,13 +13,12 @@ const authUser = asyncHandler(async (req, res) => {
     if (user && (await user.matchPassword(password))) {
         res.json({
             _id: user._id,
-            _id: user._id,
             name: user.name,
             email: user.email,
             role: user.role,
-            isAdmin: user.isAdmin,
+            region: user.region,
             addresses: user.addresses,
-            token: generateToken(user._id),
+            token: generateToken(user),
         });
     } else {
         res.status(401);
@@ -27,11 +26,11 @@ const authUser = asyncHandler(async (req, res) => {
     }
 });
 
-// @desc    Register a new user
+// @desc    Register a new user (public — always creates role: 'user')
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
     const userExists = await User.findOne({ email });
 
@@ -40,23 +39,24 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new Error('User already exists');
     }
 
+    // Public signup ALWAYS creates a normal user — never trust body.role
     const user = await User.create({
         name,
         email,
         password,
-        role: role || 'user'
+        role: 'user',
+        region: null,
     });
 
     if (user) {
         res.status(201).json({
             _id: user._id,
-            _id: user._id,
             name: user.name,
             email: user.email,
             role: user.role,
-            isAdmin: user.isAdmin,
+            region: user.region,
             addresses: user.addresses,
-            token: generateToken(user._id),
+            token: generateToken(user),
         });
     } else {
         res.status(400);
@@ -73,10 +73,10 @@ const getMe = asyncHandler(async (req, res) => {
         name: req.user.name,
         email: req.user.email,
         role: req.user.role,
-        isAdmin: req.user.isAdmin,
-        addresses: req.user.addresses
-    }
-    res.status(200).json(user)
+        region: req.user.region,
+        addresses: req.user.addresses,
+    };
+    res.status(200).json(user);
 });
 
 module.exports = {
@@ -84,3 +84,4 @@ module.exports = {
     registerUser,
     getMe,
 };
+

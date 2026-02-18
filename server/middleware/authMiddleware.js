@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const User = require('../models/User');
 
-const protect = asyncHandler(async (req, res, next) => {
+const authenticate = asyncHandler(async (req, res, next) => {
     let token;
 
     if (
@@ -14,8 +14,15 @@ const protect = asyncHandler(async (req, res, next) => {
 
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-            req.user = await User.findById(decoded.id).select('-password');
+            // Fetch user from DB (source of truth) but also carry JWT-decoded fields
+            const user = await User.findById(decoded.id).select('-password');
 
+            if (!user) {
+                res.status(401);
+                throw new Error('User no longer exists');
+            }
+
+            req.user = user;
             next();
         } catch (error) {
             console.error(error);
@@ -30,4 +37,7 @@ const protect = asyncHandler(async (req, res, next) => {
     }
 });
 
-module.exports = { protect };
+// Backward compatibility alias
+const protect = authenticate;
+
+module.exports = { authenticate, protect };

@@ -15,16 +15,16 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    isAdmin: {
-        type: Boolean,
-        required: true,
-        default: false
-    },
     role: {
         type: String,
         required: true,
-        enum: ['user', 'recruiter'],
+        enum: ['superadmin', 'admin', 'user'],
         default: 'user'
+    },
+    region: {
+        type: String,
+        enum: ['india', 'usa', 'uk', 'uae'],
+        default: null
     },
     addresses: [
         {

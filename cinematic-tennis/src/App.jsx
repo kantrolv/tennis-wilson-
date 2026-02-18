@@ -17,6 +17,9 @@ import Profile from './pages/Profile';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import ProtectedRoute from './components/ProtectedRoute';
+import RoleProtectedRoute from './components/RoleProtectedRoute';
+import AdminDashboard from './pages/AdminDashboard';
+import SuperadminDashboard from './pages/SuperadminDashboard';
 
 function App() {
   const lenisRef = useRef();
@@ -47,7 +50,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
 
-                {/* Protected Routes */}
+                {/* Protected Routes (any logged-in user) */}
                 <Route path="/profile" element={
                   <ProtectedRoute>
                     <Profile />
@@ -62,6 +65,20 @@ function App() {
                   <ProtectedRoute>
                     <Checkout />
                   </ProtectedRoute>
+                } />
+
+                {/* Admin Routes (admin + superadmin) */}
+                <Route path="/admin/dashboard" element={
+                  <RoleProtectedRoute allowedRoles={['admin', 'superadmin']}>
+                    <AdminDashboard />
+                  </RoleProtectedRoute>
+                } />
+
+                {/* Superadmin Routes (superadmin only) */}
+                <Route path="/superadmin/dashboard" element={
+                  <RoleProtectedRoute allowedRoles={['superadmin']}>
+                    <SuperadminDashboard />
+                  </RoleProtectedRoute>
                 } />
               </Routes>
             </ReactLenis>

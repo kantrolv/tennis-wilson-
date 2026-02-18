@@ -15,8 +15,16 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await login(email, password);
-            navigate(from, { replace: true });
+            const data = await login(email, password);
+
+            // Role-based redirect after login
+            if (data.role === 'superadmin') {
+                navigate('/superadmin/dashboard', { replace: true });
+            } else if (data.role === 'admin') {
+                navigate('/admin/dashboard', { replace: true });
+            } else {
+                navigate(from, { replace: true });
+            }
         } catch (err) {
             console.error(err);
         }

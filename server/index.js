@@ -31,6 +31,8 @@ const orderRoutes = require('./routes/orderRoutes');
 const racketRoutes = require('./routes/rackets.routes');
 const userRoutes = require('./routes/userRoutes');
 const cartRoutes = require('./routes/cartRoutes');
+const adminRoutes = require('./routes/admin');
+const superadminRoutes = require('./routes/superadmin');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 app.use('/api/auth', authRoutes);
@@ -39,6 +41,8 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/rackets', racketRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/superadmin', superadminRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
