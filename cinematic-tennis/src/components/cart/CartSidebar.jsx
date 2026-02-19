@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useCart } from '../../context/CartContext';
 import { useRegion } from '../../context/RegionContext';
+import { REGION_MAP, CURRENCY_SYMBOLS } from '../../utils/regionPricing';
 import gsap from 'gsap';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -32,9 +33,10 @@ const CartSidebar = () => {
 
     const handleClose = () => setIsCartOpen(false);
 
-    // Format currency helper
-    const fmtPrice = (price) => {
-        return `${region.currencySymbol}${Math.round(price * region.multiplier).toLocaleString()}`;
+    // Format currency helper — uses regional pricing
+    const fmtPrice = (priceUSD) => {
+        const converted = Math.round(priceUSD * region.multiplier);
+        return `${region.currencySymbol}${converted.toLocaleString()}`;
     };
 
     return (

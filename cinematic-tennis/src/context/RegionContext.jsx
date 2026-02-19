@@ -10,6 +10,7 @@ const regions = [
     { code: 'JP', name: 'Japan', lang: '日本語', curr: 'JPY', symbol: '¥', mult: 148, phoneCode: '+81', phoneLength: 10, postalCodeRegex: /^\d{3}-?\d{4}$/ },
     { code: 'AU', name: 'Australia', lang: 'English', curr: 'AUD', symbol: 'A$', mult: 1.53, phoneCode: '+61', phoneLength: 9, postalCodeRegex: /^\d{4}$/ },
     { code: 'IN', name: 'India', lang: 'English/Hindi', curr: 'INR', symbol: '₹', mult: 83, phoneCode: '+91', phoneLength: 10, postalCodeRegex: /^\d{6}$/ },
+    { code: 'AE', name: 'UAE', lang: 'English/Arabic', curr: 'AED', symbol: 'د.إ', mult: 3.67, phoneCode: '+971', phoneLength: 9, postalCodeRegex: /^.*$/ },
 ];
 
 export const RegionProvider = ({ children }) => {
@@ -53,6 +54,17 @@ export const RegionProvider = ({ children }) => {
         }
     };
 
+    // Auto-sync region when any user logs in
+    // Backend now stores the same country codes as frontend (US, GB, FR, DE, JP, AU, IN, AE)
+    const syncRegionFromUser = (user) => {
+        if (user?.region) {
+            const frontendCode = user.region;
+            if (frontendCode !== region.countryCode) {
+                changeRegion(frontendCode);
+            }
+        }
+    };
+
     const openSelector = (action = null) => {
         if (action) setSubsequentAction(() => action);
         setIsSelectorOpen(true);
@@ -77,6 +89,7 @@ export const RegionProvider = ({ children }) => {
         <RegionContext.Provider value={{
             region,
             changeRegion,
+            syncRegionFromUser,
             regions,
             isSelectorOpen,
             openSelector,

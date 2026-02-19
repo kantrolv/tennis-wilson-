@@ -30,7 +30,7 @@ const authUser = asyncHandler(async (req, res) => {
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, region } = req.body;
 
     const userExists = await User.findOne({ email });
 
@@ -39,13 +39,17 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new Error('User already exists');
     }
 
+    // Validate region
+    const validRegions = ['US', 'GB', 'FR', 'DE', 'JP', 'AU', 'IN', 'AE'];
+    const userRegion = validRegions.includes(region) ? region : 'US';
+
     // Public signup ALWAYS creates a normal user — never trust body.role
     const user = await User.create({
         name,
         email,
         password,
         role: 'user',
-        region: null,
+        region: userRegion,
     });
 
     if (user) {

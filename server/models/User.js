@@ -23,8 +23,8 @@ const userSchema = mongoose.Schema({
     },
     region: {
         type: String,
-        enum: ['india', 'usa', 'uk', 'uae'],
-        default: null
+        enum: ['US', 'GB', 'FR', 'DE', 'JP', 'AU', 'IN', 'AE'],
+        default: 'US'
     },
     addresses: [
         {

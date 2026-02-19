@@ -62,10 +62,15 @@ const Checkout = () => {
         setSelectedAddressId(id);
     };
 
+    // Get country name from user's region — always locked to their region
+    const getUserCountryName = () => {
+        const regionData = LOCATION_DATA.find(c => c.countryCode === region?.countryCode);
+        return regionData ? regionData.name : 'United States';
+    };
+
     const handleAddNewClick = () => {
         setEditingAddressId(null);
-        // Default to global region if it matches our supported list, else US
-        const defaultCountry = LOCATION_DATA.find(c => c.name === region?.countryName) ? region.countryName : 'United States';
+        const defaultCountry = getUserCountryName();
         const countryData = LOCATION_DATA.find(c => c.name === defaultCountry);
 
         setFormData({
@@ -355,18 +360,17 @@ const Checkout = () => {
                                     <div className="form-row">
                                         <div className="form-group">
                                             <label className="form-label">Country</label>
-                                            <select
-                                                className="form-input form-select"
+                                            <input
+                                                type="text"
+                                                className="form-input"
                                                 name="country"
                                                 value={formData.country}
-                                                onChange={handleFormChange}
-                                                required
-                                            >
-                                                <option value="" disabled>Select Country</option>
-                                                {LOCATION_DATA.map(c => (
-                                                    <option key={c.countryCode} value={c.name}>{c.name}</option>
-                                                ))}
-                                            </select>
+                                                readOnly
+                                                style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed', opacity: 0.8 }}
+                                            />
+                                            <span style={{ fontSize: '0.75rem', color: '#888', marginTop: '4px', display: 'block' }}>
+                                                Country is set based on your region
+                                            </span>
                                         </div>
                                         <div className="form-group">
                                             <label className="form-label">State / Province</label>

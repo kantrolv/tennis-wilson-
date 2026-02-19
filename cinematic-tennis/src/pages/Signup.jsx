@@ -2,11 +2,23 @@ import { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 
+const REGION_OPTIONS = [
+    { code: 'US', flag: '🇺🇸', name: 'United States', currency: 'USD ($)' },
+    { code: 'GB', flag: '🇬🇧', name: 'United Kingdom', currency: 'GBP (£)' },
+    { code: 'FR', flag: '🇫🇷', name: 'France', currency: 'EUR (€)' },
+    { code: 'DE', flag: '🇩🇪', name: 'Germany', currency: 'EUR (€)' },
+    { code: 'JP', flag: '🇯🇵', name: 'Japan', currency: 'JPY (¥)' },
+    { code: 'AU', flag: '🇦🇺', name: 'Australia', currency: 'AUD (A$)' },
+    { code: 'IN', flag: '🇮🇳', name: 'India', currency: 'INR (₹)' },
+    { code: 'AE', flag: '🇦🇪', name: 'UAE', currency: 'AED (د.إ)' },
+];
+
 const Signup = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [selectedRegion, setSelectedRegion] = useState('US');
     const [message, setMessage] = useState(null);
 
     const { signup, error } = useContext(AuthContext);
@@ -21,8 +33,13 @@ const Signup = () => {
             return;
         }
 
+        if (!selectedRegion) {
+            setMessage('Please select your region');
+            return;
+        }
+
         try {
-            await signup(name, email, password);
+            await signup(name, email, password, selectedRegion);
             navigate('/');
         } catch (err) {
             console.error(err);
@@ -75,6 +92,23 @@ const Signup = () => {
                             required
                             placeholder="name@example.com"
                         />
+                    </div>
+
+                    <div className="auth-form-group">
+                        <label className="auth-label">Your Region</label>
+                        <div className="region-selector-grid">
+                            {REGION_OPTIONS.map((r) => (
+                                <div
+                                    key={r.code}
+                                    className={`region-option ${selectedRegion === r.code ? 'region-option--selected' : ''}`}
+                                    onClick={() => setSelectedRegion(r.code)}
+                                >
+                                    <span className="region-flag">{r.flag}</span>
+                                    <span className="region-name">{r.name}</span>
+                                    <span className="region-currency">{r.currency}</span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
                     <div className="auth-form-group">

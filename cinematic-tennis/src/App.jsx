@@ -37,8 +37,8 @@ function App() {
   }, []);
 
   return (
-    <AuthProvider>
-      <RegionProvider>
+    <RegionProvider>
+      <AuthProvider>
         <CartProvider>
           <Router>
             <ReactLenis root ref={lenisRef} autoRaf={false}>
@@ -84,8 +84,8 @@ function App() {
             </ReactLenis>
           </Router>
         </CartProvider>
-      </RegionProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </RegionProvider>
   );
 }
 

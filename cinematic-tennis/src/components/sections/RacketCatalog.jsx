@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import axios from 'axios';
 import { useRegion } from '../../context/RegionContext';
+import { getRegionalPrice, REGION_MAP } from '../../utils/regionPricing';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -44,7 +45,9 @@ const RacketCatalog = ({ onCheckout }) => {
                 const params = new URLSearchParams();
                 if (filters.series.length > 0) params.append('series', filters.series.join(','));
 
-                // Convert user-entered price (in local currency) to base price (USD) for filtering
+                // Convert user-entered price (in local currency) to base USD for backend filtering
+                const backendRegion = REGION_MAP[region.countryCode] || 'usa';
+                // We'll filter client-side for now since backend filters on base price
                 if (filters.minPrice) params.append('minPrice', Number(filters.minPrice) / region.multiplier);
                 if (filters.maxPrice) params.append('maxPrice', Number(filters.maxPrice) / region.multiplier);
 
@@ -375,8 +378,10 @@ const RacketCatalog = ({ onCheckout }) => {
                                                         fontWeight: '700',
                                                         color: '#051025'
                                                     }}>
-
-                                                        {region.currencySymbol} {Math.round(racket.price * region.multiplier).toLocaleString()}
+                                                        {(() => {
+                                                            const rp = getRegionalPrice(racket, region);
+                                                            return `${rp.symbol}${rp.price?.toLocaleString()}`;
+                                                        })()}
                                                     </span>
                                                     <button
                                                         onClick={(e) => {

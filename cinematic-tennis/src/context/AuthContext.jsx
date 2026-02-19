@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import { useRegion } from './RegionContext';
 
 const AuthContext = createContext();
 
@@ -11,6 +12,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { syncRegionFromUser } = useRegion();
 
     useEffect(() => {
         const checkUserLoggedIn = async () => {
@@ -25,6 +27,8 @@ export const AuthProvider = ({ children }) => {
                     }
                     const { data } = await axios.get('http://localhost:5001/api/auth/me', config);
                     setUser(data);
+                    // Auto-sync region for admins on initial load
+                    syncRegionFromUser(data);
                 } catch (error) {
                     localStorage.removeItem('token');
                     setUser(null);
@@ -42,6 +46,8 @@ export const AuthProvider = ({ children }) => {
             const { data } = await axios.post('http://localhost:5001/api/auth/login', { email, password });
             localStorage.setItem('token', data.token);
             setUser(data);
+            // Auto-sync region for admins on login
+            syncRegionFromUser(data);
             setLoading(false);
             return data;
         } catch (err) {
@@ -51,13 +57,15 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const signup = async (name, email, password) => {
+    const signup = async (name, email, password, region) => {
         setLoading(true);
         setError(null);
         try {
-            const { data } = await axios.post('http://localhost:5001/api/auth/signup', { name, email, password });
+            const { data } = await axios.post('http://localhost:5001/api/auth/signup', { name, email, password, region });
             localStorage.setItem('token', data.token);
             setUser(data);
+            // Sync region for the newly created user
+            syncRegionFromUser(data);
             setLoading(false);
             return data;
         } catch (err) {

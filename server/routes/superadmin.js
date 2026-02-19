@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { getDashboard, createAdmin, deleteAdmin } = require('../controllers/superadminController');
+const {
+    getDashboard, createAdmin, deleteAdmin,
+    getAnalytics, getLowStock
+} = require('../controllers/superadminController');
 const { authenticate } = require('../middleware/authMiddleware');
 const { authorize } = require('../middleware/authorize');
 
@@ -11,5 +14,7 @@ router.use(authorize(['superadmin']));
 router.get('/dashboard', getDashboard);
 router.post('/create-admin', createAdmin);
 router.delete('/delete-admin/:id', deleteAdmin);
+router.get('/analytics', getAnalytics);
+router.get('/low-stock', getLowStock);
 
 module.exports = router;

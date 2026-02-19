@@ -59,8 +59,11 @@ const getRacketById = asyncHandler(async (req, res) => {
 const createRacket = asyncHandler(async (req, res) => {
     const {
         name, brand, model, price, category, ageGroup, sport, weight,
-        balance, material, gripStock, description, imageUrl, stock
+        balance, material, gripStock, description, imageUrl
     } = req.body;
+
+    // Default stock: all regions 0 (admins can update per-region after)
+    const stock = req.body.stock || { india: 0, usa: 0, uk: 0, uae: 0 };
 
     const productExists = await Product.findOne({ name });
 
@@ -126,7 +129,13 @@ const seedRackets = asyncHandler(async (req, res) => {
                 name: item.name,
                 brand: "Wilson",
                 model: model,
-                price: item.price,
+                price: item.price, // Base USD price kept for backward compat
+                pricing: {
+                    india: { price: Math.round(item.price * 83), currency: 'INR' },
+                    usa: { price: item.price, currency: 'USD' },
+                    uk: { price: Math.round(item.price * 0.79), currency: 'GBP' },
+                    uae: { price: Math.round(item.price * 3.67), currency: 'AED' },
+                },
                 category: "racket",
                 ageGroup: ageGroup,
                 sport: "tennis",
@@ -136,7 +145,7 @@ const seedRackets = asyncHandler(async (req, res) => {
                 gripStock: { "4 1/4\" (2)": 10, "4 3/8\" (3)": 10 }, // Default stock
                 description: `Official Wilson ${item.name}. High performance tennis racket designed for players looking to elevate their game.`,
                 imageUrl: (item.imageUrl && item.imageUrl !== "No Image Found") ? item.imageUrl : "https://www.wilson.com/en-us/explore/tennis/rackets/clash-v2",
-                stock: 10,
+                stock: { india: 10, usa: 10, uk: 10, uae: 10 },
                 source: "scraper"
             };
         });

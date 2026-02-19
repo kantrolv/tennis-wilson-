@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useRegion } from '../context/RegionContext';
+import { getRegionalPrice, formatAddonPrice } from '../utils/regionPricing';
 import { useCart } from '../context/CartContext'; // Import Cart Hook
 import { useAuth } from '../context/AuthContext';
 import Layout from '../components/layout/Layout';
@@ -105,11 +106,12 @@ const ProductDetails = () => {
         </div>
     );
 
-    // Calculate dynamic price for display
-    const basePrice = product ? product.price : 0;
-    const stringPrice = selectedString ? selectedString.price : 0;
-    const coverPrice = selectedCover ? selectedCover.price : 0;
-    const totalPrice = basePrice + stringPrice + coverPrice;
+    // Calculate dynamic price for display using regional pricing
+    const rp = product ? getRegionalPrice(product, region) : { price: 0, symbol: '$', currency: 'USD' };
+    const basePrice = rp.price;
+    const stringAddon = selectedString ? formatAddonPrice(selectedString.price, product, region) : { amount: 0 };
+    const coverAddon = selectedCover ? formatAddonPrice(selectedCover.price, product, region) : { amount: 0 };
+    const totalPrice = basePrice + stringAddon.amount + coverAddon.amount;
 
     return (
         <Layout>
@@ -182,7 +184,7 @@ const ProductDetails = () => {
                         </h1>
 
                         <div style={{ fontSize: '1.75rem', fontWeight: 500, color: '#000', marginBottom: '3rem', fontFamily: 'var(--font-sans)' }}>
-                            {region.currencySymbol}{Math.round(totalPrice * region.multiplier).toLocaleString()}.00
+                            {rp.symbol}{totalPrice.toLocaleString()}.00
                         </div>
 
                         {/* --- Selections Container --- */}
@@ -246,7 +248,7 @@ const ProductDetails = () => {
                                         {selectedString ? selectedString.name : 'Select String...'}
                                     </span>
                                     <span style={{ color: '#000', fontWeight: 500 }}>
-                                        {selectedString && selectedString.price > 0 ? `+ ${region.currencySymbol}${Math.round(selectedString.price * region.multiplier).toLocaleString()}` : ''}
+                                        {selectedString && selectedString.price > 0 ? `+ ${stringAddon.formatted}` : ''}
                                         <span style={{ marginLeft: '10px', fontSize: '0.8rem' }}>{isStringDropdownOpen ? '▲' : '▼'}</span>
                                     </span>
                                 </div>
@@ -284,7 +286,7 @@ const ProductDetails = () => {
                                                 onMouseLeave={(e) => selectedString?.id !== option.id && (e.currentTarget.style.background = '#fff')}
                                             >
                                                 <span>{option.name}</span>
-                                                <span style={{ color: '#000' }}>{option.price > 0 ? `+ ${region.currencySymbol}${Math.round(option.price * region.multiplier).toLocaleString()}` : 'Free'}</span>
+                                                <span style={{ color: '#000' }}>{option.price > 0 ? `+ ${formatAddonPrice(option.price, product, region).formatted}` : 'Free'}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -312,7 +314,7 @@ const ProductDetails = () => {
                                             }}
                                         >
                                             <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.3rem' }}>{option.name}</div>
-                                            <div style={{ fontSize: '0.8rem', color: '#000' }}>{option.price > 0 ? `+ ${region.currencySymbol}${Math.round(option.price * region.multiplier).toLocaleString()}` : 'Included'}</div>
+                                            <div style={{ fontSize: '0.8rem', color: '#000' }}>{option.price > 0 ? `+ ${formatAddonPrice(option.price, product, region).formatted}` : 'Included'}</div>
                                         </div>
                                     ))}
                                 </div>
@@ -341,7 +343,7 @@ const ProductDetails = () => {
                                 width: '100%',
                             }}
                         >
-                            {selectedGrip ? `Add to Cart - ${region.currencySymbol}${Math.round(totalPrice * region.multiplier).toLocaleString()}` : 'Select a Grip Size'}
+                            {selectedGrip ? `Add to Cart - ${rp.symbol}${totalPrice.toLocaleString()}` : 'Select a Grip Size'}
                         </button>
 
                         <div style={{ marginTop: '3rem', fontSize: '1rem', lineHeight: 1.7, color: '#000', maxWidth: '500px' }}>

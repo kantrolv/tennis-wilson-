@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { getDashboard, addProduct, updateStock } = require('../controllers/adminController');
+const {
+    getDashboard, addProduct, updateStock, updatePricing,
+    getAnalytics, getLowStock
+} = require('../controllers/adminController');
 const { authenticate } = require('../middleware/authMiddleware');
 const { authorize } = require('../middleware/authorize');
 
@@ -11,5 +14,8 @@ router.use(authorize(['admin', 'superadmin']));
 router.get('/dashboard', getDashboard);
 router.post('/add-product', addProduct);
 router.put('/update-stock/:id', updateStock);
+router.put('/update-pricing/:id', updatePricing);
+router.get('/analytics', getAnalytics);
+router.get('/low-stock', getLowStock);
 
 module.exports = router;
