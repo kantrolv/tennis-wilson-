@@ -1,4 +1,4 @@
-/* Shop llayout */
+/* Shop layout */
 .shop-container {
     display: flex;
     max-width: var(--container-width, 1400px);
