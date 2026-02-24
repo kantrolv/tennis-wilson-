@@ -1,36 +1,94 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import axios from 'axios';
 import { useCart } from '../context/CartContext';
+import { useRegion } from '../context/RegionContext';
 import Layout from '../components/layout/Layout';
 import '../styles/OrderSuccess.css';
 
 const OrderSuccess = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const [searchParams] = useSearchParams();
     const { clearCart } = useCart();
+    const { region } = useRegion();
     const [showContent, setShowContent] = useState(false);
+    const [fetchedOrder, setFetchedOrder] = useState(null);
     const hasClearedRef = useRef(false);
 
-    const orderData = location.state;
+    const orderDataState = location.state;
+    const queryId = searchParams.get('id');
 
     useEffect(() => {
-        if (!orderData) {
+        if (!orderDataState && !queryId) {
             navigate('/');
             return;
         }
 
-        // Clear cart securely once user lands on success page
-        if (!hasClearedRef.current) {
+        // Only clear cart if this is accessed immediately after paying (has state)
+        if (orderDataState && !hasClearedRef.current) {
             clearCart();
             hasClearedRef.current = true;
+            const timer = setTimeout(() => setShowContent(true), 100);
+            return () => clearTimeout(timer);
         }
 
-        // Trigger entrance animation
-        const timer = setTimeout(() => setShowContent(true), 100);
-        return () => clearTimeout(timer);
-    }, [orderData, navigate, clearCart]);
+        if (!orderDataState && queryId) {
+            const fetchOrder = async () => {
+                try {
+                    let token = localStorage.getItem('token');
+                    if (!token) {
+                        const userInfo = localStorage.getItem('userInfo');
+                        if (userInfo) token = JSON.parse(userInfo).token;
+                    }
+                    if (!token) throw new Error("Not authenticated");
 
-    if (!orderData) return null;
+                    const { data } = await axios.get(`http://localhost:5001/api/orders/${queryId}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    setFetchedOrder(data);
+                    setTimeout(() => setShowContent(true), 100);
+                } catch (err) {
+                    console.error("Failed to fetch order", err);
+                    navigate('/');
+                }
+            };
+            fetchOrder();
+        }
+    }, [orderDataState, queryId, navigate, clearCart]);
+
+    if (!orderDataState && !fetchedOrder) return null;
+
+    // Use orderDataState or construct from fetchedOrder
+    let displayData = orderDataState;
+
+    if (!displayData && fetchedOrder) {
+        const dbTotal = fetchedOrder.totalPrice;
+        // Construct display format from backend model to match UI requirements
+        displayData = {
+            orderId: fetchedOrder._id,
+            paymentMethod: 'Standard Payment',
+            shippingAddress: fetchedOrder.shippingAddress,
+            regionName: region.countryName || 'Local',
+            currency: region.currency,
+            currencySymbol: region.currencySymbol,
+            deliveryEstimate: {
+                from: new Date(new Date(fetchedOrder.createdAt).getTime() + 5 * 24 * 60 * 60 * 1000),
+                to: new Date(new Date(fetchedOrder.createdAt).getTime() + 8 * 24 * 60 * 60 * 1000)
+            },
+            orderSummary: {
+                items: fetchedOrder.orderItems.map(item => ({
+                    name: item.name,
+                    qty: item.qty || item.quantity || 1,
+                    price: item.price
+                })),
+                subtotal: dbTotal,
+                tax: { label: 'Tax', amount: 0 },
+                shipping: { label: 'Shipping', amount: 0, isFree: true },
+                total: dbTotal
+            }
+        };
+    }
 
     const {
         orderId,
@@ -41,7 +99,7 @@ const OrderSuccess = () => {
         currencySymbol,
         deliveryEstimate,
         orderSummary
-    } = orderData;
+    } = displayData;
 
     const formatCurrency = (amount) => `${currencySymbol}${amount.toLocaleString()}`;
 
@@ -66,10 +124,21 @@ const OrderSuccess = () => {
                             <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
                         </svg>
                     </div>
-                    <h1 className="success-title">Order Confirmed!</h1>
-                    <p className="success-subtitle">
-                        Thank you for your purchase. Your order has been placed successfully.
-                    </p>
+                    {orderDataState ? (
+                        <>
+                            <h1 className="success-title">Order Confirmed!</h1>
+                            <p className="success-subtitle">
+                                Thank you for your purchase. Your order has been placed successfully.
+                            </p>
+                        </>
+                    ) : (
+                        <>
+                            <h1 className="success-title">Order Details</h1>
+                            <p className="success-subtitle">
+                                Here are the details for your past order.
+                            </p>
+                        </>
+                    )}
                     <div className="success-order-id">
                         <span className="order-id-label">Order ID</span>
                         <span className="order-id-value">{orderId}</span>
@@ -179,16 +248,24 @@ const OrderSuccess = () => {
                     <button className="action-btn-primary" onClick={() => navigate('/rackets')}>
                         Continue Shopping
                     </button>
-                    <button className="action-btn-secondary" onClick={() => navigate('/')}>
-                        Back to Home
-                    </button>
+                    {orderDataState && (
+                        <button className="action-btn-secondary" onClick={() => navigate('/orders')}>
+                            View My Orders
+                        </button>
+                    )}
                 </div>
 
                 {/* Footer note */}
                 <p className="success-note">
-                    A confirmation email will be sent to your registered email address.
-                    <br />
-                    <em>This is a demo transaction — no real payment was processed.</em>
+                    {orderDataState ? (
+                        <>
+                            A confirmation email will be sent to your registered email address.
+                            <br />
+                            <em>This is a demo transaction — no real payment was processed.</em>
+                        </>
+                    ) : (
+                        <em>This was a demo transaction processed on this site.</em>
+                    )}
                 </p>
             </div>
         </Layout>

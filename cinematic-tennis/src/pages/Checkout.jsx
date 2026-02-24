@@ -42,10 +42,9 @@ const Checkout = () => {
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     };
 
-    // Redirect if cart is empty
     useEffect(() => {
         if (cart.length === 0) {
-            navigate('/cart');
+            navigate('/rackets');
         }
     }, [cart, navigate]);
 

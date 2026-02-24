@@ -10,6 +10,7 @@ import {
     generateOrderId,
     getDeliveryEstimate
 } from '../constants/paymentConfig';
+import axios from 'axios';
 import '../styles/Payment.css';
 
 const Payment = () => {
@@ -67,19 +68,102 @@ const Payment = () => {
         }
     }, [isProcessing]);
 
-    const handlePayNow = () => {
+    const handlePayNow = async () => {
         if (!selectedMethod) return;
+
+        const selectedPaymentObj = paymentMethods.find(m => m.id === selectedMethod);
+        if (selectedPaymentObj?.type === 'card') {
+            if (!cardDetails.number || !cardDetails.name || !cardDetails.expiry || !cardDetails.cvv) {
+                alert("Please fill in all card details to proceed.");
+                return;
+            }
+            if (cardDetails.number.replace(/\s/g, '').length < 15) {
+                alert("Please enter a valid card number.");
+                return;
+            }
+            if (cardDetails.expiry.length < 5) {
+                alert("Please enter a valid expiry date (MM/YY).");
+                return;
+            }
+            if (cardDetails.cvv.length < 3) {
+                alert("Please enter a valid CVV.");
+                return;
+            }
+        } else if (selectedPaymentObj?.type === 'upi') {
+            if (!upiId) {
+                alert("Please enter your UPI ID.");
+                return;
+            }
+        } else if (selectedPaymentObj?.type === 'bank') {
+            if (!sepaIban) {
+                alert("Please enter your IBAN.");
+                return;
+            }
+        }
+
         setIsProcessing(true);
         setProcessingStep(0);
 
-        // Simulate 2.5s processing, then show "Payment Done" for 2s before redirect
-        setTimeout(() => {
+        try {
+            // Simulate processing steps in UI
+            await new Promise(resolve => setTimeout(resolve, 2500));
+
+            // Get user token
+            let token = localStorage.getItem('token');
+            if (!token) {
+                const userInfo = localStorage.getItem('userInfo');
+                if (userInfo) {
+                    try {
+                        const parsed = JSON.parse(userInfo);
+                        token = parsed.token;
+                    } catch (e) {
+                        console.error('Failed to parse userInfo for token');
+                    }
+                }
+            }
+
+            if (!token) {
+                throw new Error("You must be logged in to place an order.");
+            }
+
+            const config = {
+                headers: { Authorization: `Bearer ${token}` }
+            };
+
+            const backendUrl = 'http://localhost:5001';
+
+            // Submit order to backend
+            const orderPayload = {
+                orderItems: cart.map(item => ({
+                    product: item.product || item._id, // exact string 
+                    name: item.name,
+                    qty: item.quantity || item.qty || 1,
+                    gripSize: item.gripSize || item.selectedGrip || 'N/A',
+                    price: Math.round((item.price) * region.multiplier),
+                    imageUrl: item.imageUrl || item.image || ''
+                })),
+                totalPrice: total,
+                shippingAddress: {
+                    fullName: shippingAddress.fullName,
+                    phoneNumber: shippingAddress.phoneNumber,
+                    addressLine1: shippingAddress.addressLine1,
+                    addressLine2: shippingAddress.addressLine2 || '',
+                    city: shippingAddress.city,
+                    state: shippingAddress.state,
+                    postalCode: shippingAddress.postalCode,
+                    country: shippingAddress.country,
+                    label: shippingAddress.label || 'Home'
+                }
+            };
+
+            const { data } = await axios.post(`${backendUrl}/api/orders`, orderPayload, config);
+
             setIsProcessing(false);
             setPaymentDone(true);
 
             // After showing "Payment Done" for 2 seconds, navigate
             setTimeout(() => {
-                const orderId = generateOrderId();
+                const orderId = data._id || generateOrderId();
                 const delivery = getDeliveryEstimate(regionCode);
                 const selectedPaymentObj = paymentMethods.find(m => m.id === selectedMethod);
 
@@ -106,7 +190,12 @@ const Payment = () => {
                     }
                 });
             }, 2000);
-        }, 2500);
+        } catch (error) {
+            console.error('Failed to place order', error);
+            alert(error.response?.data?.message || error.message || "Payment failed. Please try again.");
+            setIsProcessing(false);
+            setProcessingStep(0);
+        }
     };
 
     const formatCardNumber = (value) => {
