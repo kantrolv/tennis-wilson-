@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Auth from './pages/Auth';
 import Home from './pages/Home';
 import Rackets from './pages/Rackets';
@@ -14,7 +14,6 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import "./styles/Auth.css";
 import Profile from './pages/Profile';
-import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Payment from './pages/Payment';
 import OrderSuccess from './pages/OrderSuccess';
@@ -22,6 +21,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import RoleProtectedRoute from './components/RoleProtectedRoute';
 import AdminDashboard from './pages/AdminDashboard';
 import SuperadminDashboard from './pages/SuperadminDashboard';
+import Orders from './pages/Orders';
 
 function App() {
   const lenisRef = useRef();
@@ -58,11 +58,6 @@ function App() {
                     <Profile />
                   </ProtectedRoute>
                 } />
-                <Route path="/cart" element={
-                  <ProtectedRoute>
-                    <Cart />
-                  </ProtectedRoute>
-                } />
                 <Route path="/checkout" element={
                   <ProtectedRoute>
                     <Checkout />
@@ -76,6 +71,11 @@ function App() {
                 <Route path="/order-success" element={
                   <ProtectedRoute>
                     <OrderSuccess />
+                  </ProtectedRoute>
+                } />
+                <Route path="/orders" element={
+                  <ProtectedRoute>
+                    <Orders />
                   </ProtectedRoute>
                 } />
 
@@ -92,12 +92,13 @@ function App() {
                     <SuperadminDashboard />
                   </RoleProtectedRoute>
                 } />
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </ReactLenis>
           </Router>
         </CartProvider>
       </AuthProvider>
-    </RegionProvider>
+    </RegionProvider >
   );
 }
 

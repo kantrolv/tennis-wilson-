@@ -70,6 +70,18 @@ const Header = () => {
           }}>
             Rackets
           </a>
+          {user && (
+            <Link to="/orders" style={{
+              textDecoration: 'none',
+              color: 'inherit',
+              fontFamily: 'var(--font-sans)',
+              fontSize: '0.9rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}>
+              Orders
+            </Link>
+          )}
           {user && (user.role === 'admin' || user.role === 'superadmin') && (
             <Link to={user.role === 'superadmin' ? '/superadmin/dashboard' : '/admin/dashboard'} style={{
               textDecoration: 'none',

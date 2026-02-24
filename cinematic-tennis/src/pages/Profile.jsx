@@ -27,23 +27,39 @@ const Profile = () => {
                             <p><strong>Role:</strong> {user.role}</p>
                         </div>
 
-                        <button
-                            onClick={handleLogout}
-                            className="btn-primary"
-                            style={{
-                                marginTop: '2rem',
-                                background: 'transparent',
-                                border: '1px solid #cf102d',
-                                color: '#cf102d',
-                                padding: '0.5rem 1.5rem',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s'
-                            }}
-                            onMouseEnter={(e) => { e.target.style.background = '#cf102d'; e.target.style.color = '#fff'; }}
-                            onMouseLeave={(e) => { e.target.style.background = 'transparent'; e.target.style.color = '#cf102d'; }}
-                        >
-                            Logout
-                        </button>
+                        <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                            <button
+                                onClick={() => navigate('/orders')}
+                                className="btn-primary"
+                                style={{
+                                    background: 'var(--c-gold, #d4af37)',
+                                    border: 'none',
+                                    color: 'var(--c-bg-main)',
+                                    padding: '0.5rem 1.5rem',
+                                    cursor: 'pointer',
+                                    fontWeight: 600,
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                View My Orders
+                            </button>
+                            <button
+                                onClick={handleLogout}
+                                className="btn-primary"
+                                style={{
+                                    background: 'transparent',
+                                    border: '1px solid #cf102d',
+                                    color: '#cf102d',
+                                    padding: '0.5rem 1.5rem',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={(e) => { e.target.style.background = '#cf102d'; e.target.style.color = '#fff'; }}
+                                onMouseLeave={(e) => { e.target.style.background = 'transparent'; e.target.style.color = '#cf102d'; }}
+                            >
+                                Logout
+                            </button>
+                        </div>
                     </div>
                 )}
 
