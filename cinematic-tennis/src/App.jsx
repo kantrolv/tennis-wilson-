@@ -16,6 +16,8 @@ import "./styles/Auth.css";
 import Profile from './pages/Profile';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import Payment from './pages/Payment';
+import OrderSuccess from './pages/OrderSuccess';
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleProtectedRoute from './components/RoleProtectedRoute';
 import AdminDashboard from './pages/AdminDashboard';
@@ -64,6 +66,16 @@ function App() {
                 <Route path="/checkout" element={
                   <ProtectedRoute>
                     <Checkout />
+                  </ProtectedRoute>
+                } />
+                <Route path="/payment" element={
+                  <ProtectedRoute>
+                    <Payment />
+                  </ProtectedRoute>
+                } />
+                <Route path="/order-success" element={
+                  <ProtectedRoute>
+                    <OrderSuccess />
                   </ProtectedRoute>
                 } />
 
