@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const User = require('../models/User');
-
+const Admin = require('../models/Admin');
 const authenticate = asyncHandler(async (req, res, next) => {
     let token;
 
@@ -15,7 +15,10 @@ const authenticate = asyncHandler(async (req, res, next) => {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
             // Fetch user from DB (source of truth) but also carry JWT-decoded fields
-            const user = await User.findById(decoded.id).select('-password');
+            let user = await User.findById(decoded.id).select('-password');
+            if (!user) {
+                user = await Admin.findById(decoded.id).select('-password');
+            }
 
             if (!user) {
                 res.status(401);

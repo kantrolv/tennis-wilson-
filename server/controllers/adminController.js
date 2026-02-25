@@ -1,15 +1,16 @@
 const asyncHandler = require('express-async-handler');
 const Product = require('../models/Product');
+const Order = require('../models/Order');
 
 // Product-level region keys (used in Product model schema)
-const VALID_REGIONS = ['india', 'usa', 'uk', 'uae'];
-const REGION_CURRENCIES = { india: 'INR', usa: 'USD', uk: 'GBP', uae: 'AED' };
+const VALID_REGIONS = ['india', 'usa', 'uk', 'uae', 'france', 'germany', 'japan', 'australia'];
+const REGION_CURRENCIES = { india: 'INR', usa: 'USD', uk: 'GBP', uae: 'AED', france: 'EUR', germany: 'EUR', japan: 'JPY', australia: 'AUD' };
 const LOW_STOCK_THRESHOLD = 10;
 
 // Maps user's 2-letter region code → product schema region key
 const USER_TO_PRODUCT_REGION = {
     'US': 'usa', 'IN': 'india', 'GB': 'uk', 'AE': 'uae',
-    'FR': 'usa', 'DE': 'usa', 'JP': 'usa', 'AU': 'usa', // fallback to usa for new regions
+    'FR': 'france', 'DE': 'germany', 'JP': 'japan', 'AU': 'australia'
 };
 
 const getProductRegion = (userRegion) => USER_TO_PRODUCT_REGION[userRegion] || 'usa';
@@ -65,10 +66,18 @@ const getDashboard = asyncHandler(async (req, res) => {
                     usaStock: { $sum: '$stock.usa' },
                     ukStock: { $sum: '$stock.uk' },
                     uaeStock: { $sum: '$stock.uae' },
+                    franceStock: { $sum: '$stock.france' },
+                    germanyStock: { $sum: '$stock.germany' },
+                    japanStock: { $sum: '$stock.japan' },
+                    australiaStock: { $sum: '$stock.australia' },
                     indiaValue: { $sum: { $multiply: ['$stock.india', '$pricing.india.price'] } },
                     usaValue: { $sum: { $multiply: ['$stock.usa', '$pricing.usa.price'] } },
                     ukValue: { $sum: { $multiply: ['$stock.uk', '$pricing.uk.price'] } },
                     uaeValue: { $sum: { $multiply: ['$stock.uae', '$pricing.uae.price'] } },
+                    franceValue: { $sum: { $multiply: ['$stock.france', '$pricing.france.price'] } },
+                    germanyValue: { $sum: { $multiply: ['$stock.germany', '$pricing.germany.price'] } },
+                    japanValue: { $sum: { $multiply: ['$stock.japan', '$pricing.japan.price'] } },
+                    australiaValue: { $sum: { $multiply: ['$stock.australia', '$pricing.australia.price'] } },
                 },
             },
         ]);
@@ -84,6 +93,10 @@ const getDashboard = asyncHandler(async (req, res) => {
                     usa: { stock: d.usaStock || 0, inventoryValue: d.usaValue || 0, currency: 'USD' },
                     uk: { stock: d.ukStock || 0, inventoryValue: d.ukValue || 0, currency: 'GBP' },
                     uae: { stock: d.uaeStock || 0, inventoryValue: d.uaeValue || 0, currency: 'AED' },
+                    france: { stock: d.franceStock || 0, inventoryValue: d.franceValue || 0, currency: 'EUR' },
+                    germany: { stock: d.germanyStock || 0, inventoryValue: d.germanyValue || 0, currency: 'EUR' },
+                    japan: { stock: d.japanStock || 0, inventoryValue: d.japanValue || 0, currency: 'JPY' },
+                    australia: { stock: d.australiaStock || 0, inventoryValue: d.australiaValue || 0, currency: 'AUD' },
                 },
             },
         });
@@ -102,7 +115,7 @@ const addProduct = asyncHandler(async (req, res) => {
     } = req.body;
 
     // Build regional stock
-    let regionalStock = { india: 0, usa: 0, uk: 0, uae: 0 };
+    let regionalStock = { india: 0, usa: 0, uk: 0, uae: 0, france: 0, germany: 0, japan: 0, australia: 0 };
     if (stock && typeof stock === 'object') {
         for (const key of VALID_REGIONS) {
             if (stock[key] !== undefined) {
@@ -121,6 +134,10 @@ const addProduct = asyncHandler(async (req, res) => {
         usa: { price: 0, currency: 'USD' },
         uk: { price: 0, currency: 'GBP' },
         uae: { price: 0, currency: 'AED' },
+        france: { price: 0, currency: 'EUR' },
+        germany: { price: 0, currency: 'EUR' },
+        japan: { price: 0, currency: 'JPY' },
+        australia: { price: 0, currency: 'AUD' },
     };
     if (pricing && typeof pricing === 'object') {
         for (const key of VALID_REGIONS) {
@@ -138,6 +155,10 @@ const addProduct = asyncHandler(async (req, res) => {
         regionalPricing.india.price = Math.round(Number(price) * 83);
         regionalPricing.uk.price = Math.round(Number(price) * 0.79);
         regionalPricing.uae.price = Math.round(Number(price) * 3.67);
+        regionalPricing.france.price = Math.round(Number(price) * 0.9);
+        regionalPricing.germany.price = Math.round(Number(price) * 0.9);
+        regionalPricing.japan.price = Math.round(Number(price) * 150);
+        regionalPricing.australia.price = Math.round(Number(price) * 1.5);
     }
 
     const product = await Product.create({
@@ -311,16 +332,24 @@ const getAnalytics = asyncHandler(async (req, res) => {
                     usaStock: { $sum: '$stock.usa' },
                     ukStock: { $sum: '$stock.uk' },
                     uaeStock: { $sum: '$stock.uae' },
+                    franceStock: { $sum: '$stock.france' },
+                    germanyStock: { $sum: '$stock.germany' },
+                    japanStock: { $sum: '$stock.japan' },
+                    australiaStock: { $sum: '$stock.australia' },
                     indiaValue: { $sum: { $multiply: ['$stock.india', '$pricing.india.price'] } },
                     usaValue: { $sum: { $multiply: ['$stock.usa', '$pricing.usa.price'] } },
                     ukValue: { $sum: { $multiply: ['$stock.uk', '$pricing.uk.price'] } },
                     uaeValue: { $sum: { $multiply: ['$stock.uae', '$pricing.uae.price'] } },
+                    franceValue: { $sum: { $multiply: ['$stock.france', '$pricing.france.price'] } },
+                    germanyValue: { $sum: { $multiply: ['$stock.germany', '$pricing.germany.price'] } },
+                    japanValue: { $sum: { $multiply: ['$stock.japan', '$pricing.japan.price'] } },
+                    australiaValue: { $sum: { $multiply: ['$stock.australia', '$pricing.australia.price'] } },
                 },
             },
         ]);
 
         const d = agg[0] || {};
-        const globalValue = (d.indiaValue || 0) + (d.usaValue || 0) + (d.ukValue || 0) + (d.uaeValue || 0);
+        const globalValue = (d.indiaValue || 0) + (d.usaValue || 0) + (d.ukValue || 0) + (d.uaeValue || 0) + (d.franceValue || 0) + (d.germanyValue || 0) + (d.japanValue || 0) + (d.australiaValue || 0);
 
         res.json({
             analytics: {
@@ -331,6 +360,10 @@ const getAnalytics = asyncHandler(async (req, res) => {
                     usa: { stock: d.usaStock || 0, inventoryValue: d.usaValue || 0, currency: 'USD' },
                     uk: { stock: d.ukStock || 0, inventoryValue: d.ukValue || 0, currency: 'GBP' },
                     uae: { stock: d.uaeStock || 0, inventoryValue: d.uaeValue || 0, currency: 'AED' },
+                    france: { stock: d.franceStock || 0, inventoryValue: d.franceValue || 0, currency: 'EUR' },
+                    germany: { stock: d.germanyStock || 0, inventoryValue: d.germanyValue || 0, currency: 'EUR' },
+                    japan: { stock: d.japanStock || 0, inventoryValue: d.japanValue || 0, currency: 'JPY' },
+                    australia: { stock: d.australiaStock || 0, inventoryValue: d.australiaValue || 0, currency: 'AUD' },
                 },
             },
         });
@@ -392,6 +425,25 @@ const getLowStock = asyncHandler(async (req, res) => {
     }
 });
 
+// ─── ORDERS ─────────────────────────────────────────────────
+// @desc    Get orders for admin's region
+// @route   GET /api/admin/orders
+// @access  Admin, Superadmin
+const getOrders = asyncHandler(async (req, res) => {
+    let targetRegion;
+    if (req.user.role === 'admin') {
+        targetRegion = getProductRegion(req.user.region);
+    } else {
+        targetRegion = req.query.region || 'usa';
+    }
+
+    const orders = await Order.find({ region: targetRegion })
+        .populate('user', 'name email region')
+        .sort({ createdAt: -1 });
+
+    res.json(orders);
+});
+
 module.exports = {
     getDashboard,
     addProduct,
@@ -399,4 +451,5 @@ module.exports = {
     updatePricing,
     getAnalytics,
     getLowStock,
+    getOrders,
 };

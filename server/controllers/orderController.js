@@ -21,6 +21,19 @@ const addOrderItems = asyncHandler(async (req, res) => {
         // 1. Validate and Deduct Stock Atomically for EACH item
         // This prevents race conditions.
 
+        // Map user region to product stock key
+        const regionMap = {
+            'US': 'usa',
+            'GB': 'uk',
+            'IN': 'india',
+            'AE': 'uae',
+            'FR': 'france',
+            'DE': 'germany',
+            'JP': 'japan',
+            'AU': 'australia'
+        };
+        const regionKey = regionMap[req.user.region] || 'usa'; // fallback to usa
+
         for (const item of orderItems) {
             const { product: productId, gripSize, qty } = item;
 
@@ -29,17 +42,21 @@ const addOrderItems = asyncHandler(async (req, res) => {
             const updatedProduct = await Product.findOneAndUpdate(
                 {
                     _id: productId,
-                    [`gripStock.${gripSize}`]: { $gte: qty } // Ensure enough stock
+                    [`gripStock.${gripSize}`]: { $gte: qty }, // Ensure enough grip stock
+                    [`stock.${regionKey}`]: { $gte: qty }     // Ensure enough region stock
                 },
                 {
-                    $inc: { [`gripStock.${gripSize}`]: -qty } // Deduct stock
+                    $inc: {
+                        [`gripStock.${gripSize}`]: -qty,    // Deduct grip stock
+                        [`stock.${regionKey}`]: -qty        // Deduct region stock
+                    }
                 },
                 { new: true }
             );
 
             if (!updatedProduct) {
                 res.status(400);
-                throw new Error(`Item ${item.name} (Grip: ${gripSize}) is out of stock`);
+                throw new Error(`Item ${item.name} (Grip: ${gripSize}) is out of stock in your region`);
                 return; // Stop execution
             }
         }
@@ -47,6 +64,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
         // 2. If all stock deductions successful, create order
         const order = new Order({
             user: req.user._id,
+            region: regionKey,
             orderItems,
             totalPrice,
             shippingAddress,

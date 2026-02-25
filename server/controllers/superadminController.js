@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const User = require('../models/User');
+const Admin = require('../models/Admin');
 const Product = require('../models/Product');
 const generateToken = require('../utils/generateToken');
 
@@ -7,8 +8,8 @@ const generateToken = require('../utils/generateToken');
 const VALID_REGIONS = ['US', 'GB', 'FR', 'DE', 'JP', 'AU', 'IN', 'AE'];
 
 // For product-level stock/pricing (legacy keys in Product model)
-const PRODUCT_REGIONS = ['india', 'usa', 'uk', 'uae'];
-const REGION_CURRENCIES = { india: 'INR', usa: 'USD', uk: 'GBP', uae: 'AED' };
+const PRODUCT_REGIONS = ['india', 'usa', 'uk', 'uae', 'france', 'germany', 'japan', 'australia'];
+const REGION_CURRENCIES = { india: 'INR', usa: 'USD', uk: 'GBP', uae: 'AED', france: 'EUR', germany: 'EUR', japan: 'JPY', australia: 'AUD' };
 const LOW_STOCK_THRESHOLD = 10;
 
 // ─── DASHBOARD ──────────────────────────────────────────────
@@ -17,7 +18,7 @@ const LOW_STOCK_THRESHOLD = 10;
 // @access  Superadmin
 const getDashboard = asyncHandler(async (req, res) => {
     const totalUsers = await User.countDocuments({ role: 'user' });
-    const totalAdmins = await User.countDocuments({ role: 'admin' });
+    const totalAdmins = await Admin.countDocuments({ role: 'admin' });
     const totalProducts = await Product.countDocuments();
 
     // Per-region stock + inventory value breakdown
@@ -29,10 +30,18 @@ const getDashboard = asyncHandler(async (req, res) => {
                 usaStock: { $sum: '$stock.usa' },
                 ukStock: { $sum: '$stock.uk' },
                 uaeStock: { $sum: '$stock.uae' },
+                franceStock: { $sum: '$stock.france' },
+                germanyStock: { $sum: '$stock.germany' },
+                japanStock: { $sum: '$stock.japan' },
+                australiaStock: { $sum: '$stock.australia' },
                 indiaValue: { $sum: { $multiply: ['$stock.india', '$pricing.india.price'] } },
                 usaValue: { $sum: { $multiply: ['$stock.usa', '$pricing.usa.price'] } },
                 ukValue: { $sum: { $multiply: ['$stock.uk', '$pricing.uk.price'] } },
                 uaeValue: { $sum: { $multiply: ['$stock.uae', '$pricing.uae.price'] } },
+                franceValue: { $sum: { $multiply: ['$stock.france', '$pricing.france.price'] } },
+                germanyValue: { $sum: { $multiply: ['$stock.germany', '$pricing.germany.price'] } },
+                japanValue: { $sum: { $multiply: ['$stock.japan', '$pricing.japan.price'] } },
+                australiaValue: { $sum: { $multiply: ['$stock.australia', '$pricing.australia.price'] } },
             },
         },
     ]);
@@ -43,10 +52,14 @@ const getDashboard = asyncHandler(async (req, res) => {
         { _id: 'usa', totalStock: d.usaStock || 0, inventoryValue: d.usaValue || 0, currency: 'USD', productCount: totalProducts },
         { _id: 'uk', totalStock: d.ukStock || 0, inventoryValue: d.ukValue || 0, currency: 'GBP', productCount: totalProducts },
         { _id: 'uae', totalStock: d.uaeStock || 0, inventoryValue: d.uaeValue || 0, currency: 'AED', productCount: totalProducts },
+        { _id: 'france', totalStock: d.franceStock || 0, inventoryValue: d.franceValue || 0, currency: 'EUR', productCount: totalProducts },
+        { _id: 'germany', totalStock: d.germanyStock || 0, inventoryValue: d.germanyValue || 0, currency: 'EUR', productCount: totalProducts },
+        { _id: 'japan', totalStock: d.japanStock || 0, inventoryValue: d.japanValue || 0, currency: 'JPY', productCount: totalProducts },
+        { _id: 'australia', totalStock: d.australiaStock || 0, inventoryValue: d.australiaValue || 0, currency: 'AUD', productCount: totalProducts },
     ];
 
     // Admin list
-    const admins = await User.find({ role: 'admin' })
+    const admins = await Admin.find({ role: 'admin' })
         .select('name email region createdAt')
         .sort({ createdAt: -1 });
 
@@ -79,14 +92,21 @@ const createAdmin = asyncHandler(async (req, res) => {
         throw new Error(`Invalid region. Must be one of: ${VALID_REGIONS.join(', ')}`);
     }
 
-    const userExists = await User.findOne({ email });
+    // Check if an admin for this region already exists
+    const existingAdminForRegion = await Admin.findOne({ role: 'admin', region });
+    if (existingAdminForRegion) {
+        res.status(400);
+        throw new Error(`An admin for region ${region} already exists. You must delete the existing admin before creating a new one for this region.`);
+    }
+
+    const userExists = await User.findOne({ email }) || await Admin.findOne({ email });
     if (userExists) {
         res.status(400);
         throw new Error('User with this email already exists');
     }
 
     // HARD CODE role to 'admin' — NEVER trust body.role
-    const admin = await User.create({
+    const admin = await Admin.create({
         name, email, password,
         role: 'admin',
         region,
@@ -112,7 +132,7 @@ const createAdmin = asyncHandler(async (req, res) => {
 // @route   DELETE /api/superadmin/delete-admin/:id
 // @access  Superadmin
 const deleteAdmin = asyncHandler(async (req, res) => {
-    const admin = await User.findById(req.params.id);
+    const admin = await Admin.findById(req.params.id);
 
     if (!admin) {
         res.status(404);
@@ -124,7 +144,7 @@ const deleteAdmin = asyncHandler(async (req, res) => {
         throw new Error('Can only delete users with admin role');
     }
 
-    await User.findByIdAndDelete(req.params.id);
+    await Admin.findByIdAndDelete(req.params.id);
 
     res.json({
         message: `Admin '${admin.email}' (${admin.region}) deleted successfully`,
@@ -145,17 +165,25 @@ const getAnalytics = asyncHandler(async (req, res) => {
                 usaStock: { $sum: '$stock.usa' },
                 ukStock: { $sum: '$stock.uk' },
                 uaeStock: { $sum: '$stock.uae' },
+                franceStock: { $sum: '$stock.france' },
+                germanyStock: { $sum: '$stock.germany' },
+                japanStock: { $sum: '$stock.japan' },
+                australiaStock: { $sum: '$stock.australia' },
                 indiaValue: { $sum: { $multiply: ['$stock.india', '$pricing.india.price'] } },
                 usaValue: { $sum: { $multiply: ['$stock.usa', '$pricing.usa.price'] } },
                 ukValue: { $sum: { $multiply: ['$stock.uk', '$pricing.uk.price'] } },
                 uaeValue: { $sum: { $multiply: ['$stock.uae', '$pricing.uae.price'] } },
+                franceValue: { $sum: { $multiply: ['$stock.france', '$pricing.france.price'] } },
+                germanyValue: { $sum: { $multiply: ['$stock.germany', '$pricing.germany.price'] } },
+                japanValue: { $sum: { $multiply: ['$stock.japan', '$pricing.japan.price'] } },
+                australiaValue: { $sum: { $multiply: ['$stock.australia', '$pricing.australia.price'] } },
             },
         },
     ]);
 
     const d = agg[0] || {};
-    const globalValue = (d.indiaValue || 0) + (d.usaValue || 0) + (d.ukValue || 0) + (d.uaeValue || 0);
-    const globalStock = (d.indiaStock || 0) + (d.usaStock || 0) + (d.ukStock || 0) + (d.uaeStock || 0);
+    const globalValue = (d.indiaValue || 0) + (d.usaValue || 0) + (d.ukValue || 0) + (d.uaeValue || 0) + (d.franceValue || 0) + (d.germanyValue || 0) + (d.japanValue || 0) + (d.australiaValue || 0);
+    const globalStock = (d.indiaStock || 0) + (d.usaStock || 0) + (d.ukStock || 0) + (d.uaeStock || 0) + (d.franceStock || 0) + (d.germanyStock || 0) + (d.japanStock || 0) + (d.australiaStock || 0);
 
     // Low stock counts per region
     const lowStockCounts = {};
@@ -175,6 +203,10 @@ const getAnalytics = asyncHandler(async (req, res) => {
                 usa: { stock: d.usaStock || 0, inventoryValue: d.usaValue || 0, currency: 'USD', lowStockCount: lowStockCounts.usa },
                 uk: { stock: d.ukStock || 0, inventoryValue: d.ukValue || 0, currency: 'GBP', lowStockCount: lowStockCounts.uk },
                 uae: { stock: d.uaeStock || 0, inventoryValue: d.uaeValue || 0, currency: 'AED', lowStockCount: lowStockCounts.uae },
+                france: { stock: d.franceStock || 0, inventoryValue: d.franceValue || 0, currency: 'EUR', lowStockCount: lowStockCounts.france },
+                germany: { stock: d.germanyStock || 0, inventoryValue: d.germanyValue || 0, currency: 'EUR', lowStockCount: lowStockCounts.germany },
+                japan: { stock: d.japanStock || 0, inventoryValue: d.japanValue || 0, currency: 'JPY', lowStockCount: lowStockCounts.japan },
+                australia: { stock: d.australiaStock || 0, inventoryValue: d.australiaValue || 0, currency: 'AUD', lowStockCount: lowStockCounts.australia },
             },
         },
     });
