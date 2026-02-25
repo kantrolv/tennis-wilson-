@@ -6,6 +6,11 @@ const orderSchema = mongoose.Schema({
         required: true,
         ref: 'User'
     },
+    region: {
+        type: String,
+        required: true,
+        default: 'usa'
+    },
     shippingAddress: {
         fullName: { type: String, required: true },
         phoneNumber: { type: String, required: true },

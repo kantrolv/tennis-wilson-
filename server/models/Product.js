@@ -31,6 +31,10 @@ const productSchema = mongoose.Schema({
         usa: { type: regionPricingSchema, default: () => ({ price: 0, currency: 'USD' }) },
         uk: { type: regionPricingSchema, default: () => ({ price: 0, currency: 'GBP' }) },
         uae: { type: regionPricingSchema, default: () => ({ price: 0, currency: 'AED' }) },
+        france: { type: regionPricingSchema, default: () => ({ price: 0, currency: 'EUR' }) },
+        germany: { type: regionPricingSchema, default: () => ({ price: 0, currency: 'EUR' }) },
+        japan: { type: regionPricingSchema, default: () => ({ price: 0, currency: 'JPY' }) },
+        australia: { type: regionPricingSchema, default: () => ({ price: 0, currency: 'AUD' }) },
     },
     category: {
         type: String,
@@ -78,6 +82,10 @@ const productSchema = mongoose.Schema({
         usa: { type: Number, default: 0 },
         uk: { type: Number, default: 0 },
         uae: { type: Number, default: 0 },
+        france: { type: Number, default: 0 },
+        germany: { type: Number, default: 0 },
+        japan: { type: Number, default: 0 },
+        australia: { type: Number, default: 0 },
     }
 }, {
     timestamps: true
@@ -88,6 +96,10 @@ productSchema.index({ 'stock.india': 1 });
 productSchema.index({ 'stock.usa': 1 });
 productSchema.index({ 'stock.uk': 1 });
 productSchema.index({ 'stock.uae': 1 });
+productSchema.index({ 'stock.france': 1 });
+productSchema.index({ 'stock.germany': 1 });
+productSchema.index({ 'stock.japan': 1 });
+productSchema.index({ 'stock.australia': 1 });
 
 const Product = mongoose.model('Product', productSchema);
 
