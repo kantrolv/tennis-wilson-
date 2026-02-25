@@ -3,9 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import axios from 'axios';
 
-const CURRENCY_SYMBOLS = { INR: '₹', USD: '$', GBP: '£', AED: 'د.إ' };
+const CURRENCY_SYMBOLS = { INR: '₹', USD: '$', GBP: '£', AED: 'د.إ', EUR: '€', JPY: '¥', AUD: 'A$' };
 const REGION_COLORS = {
-    india: '#f093fb', usa: '#667eea', uk: '#00c864', uae: '#ffa726',
+    india: '#FF7E67', usa: '#4A90E2', uk: '#00A854', uae: '#F5A623', france: '#8E44AD', germany: '#2C3E50', japan: '#E74C3C', australia: '#F1C40F'
+};
+const REGION_LABELS = {
+    india: '🇮🇳 India', usa: '🇺🇸 United States', uk: '🇬🇧 United Kingdom', uae: '🇦🇪 UAE', france: '🇫🇷 France', germany: '🇩🇪 Germany', japan: '🇯🇵 Japan', australia: '🇦🇺 Australia'
+};
+const ADMIN_REGION_LABELS = {
+    US: '🇺🇸 United States', GB: '🇬🇧 United Kingdom', FR: '🇫🇷 France', DE: '🇩🇪 Germany', JP: '🇯🇵 Japan', AU: '🇦🇺 Australia', IN: '🇮🇳 India', AE: '🇦🇪 UAE'
 };
 
 const SuperadminDashboard = () => {
@@ -52,7 +58,9 @@ const SuperadminDashboard = () => {
         try {
             const { data } = await axios.post('http://localhost:5001/api/superadmin/create-admin', formData, authHeader);
             setActionMsg({ type: 'success', text: `✅ Admin created: ${data.email} (${data.region})` });
-            setFormData({ name: '', email: '', password: '', region: 'US' });
+
+            // Set form to empty, region will be correctly set by the useEffect
+            setFormData({ name: '', email: '', password: '', region: '' });
             fetchAll();
         } catch (err) {
             setActionMsg({ type: 'error', text: `❌ ${err.response?.data?.message || 'Failed'}` });
@@ -60,6 +68,20 @@ const SuperadminDashboard = () => {
             setCreating(false);
         }
     };
+
+    // Keep formData.region valid based on available regions
+    useEffect(() => {
+        if (dashboard?.admins) {
+            const taken = dashboard.admins.map(a => a.region);
+            if (taken.includes(formData.region) || !formData.region) {
+                const allRegionVals = ['US', 'GB', 'FR', 'DE', 'JP', 'AU', 'IN', 'AE'];
+                const firstAvailable = allRegionVals.find(r => !taken.includes(r)) || '';
+                if (formData.region !== firstAvailable) {
+                    setFormData(prev => ({ ...prev, region: firstAvailable }));
+                }
+            }
+        }
+    }, [dashboard, formData.region]);
 
     const handleDeleteAdmin = async (id, email) => {
         if (!window.confirm(`Delete admin: ${email}?`)) return;
@@ -133,8 +155,8 @@ const SuperadminDashboard = () => {
                         <div style={styles.regionGrid}>
                             {dashboard?.regionStats?.map(r => (
                                 <div key={r._id} style={styles.regionCard}>
-                                    <span style={{ ...styles.regionName, color: REGION_COLORS[r._id] || '#f093fb' }}>
-                                        {r._id?.toUpperCase()}
+                                    <span style={{ ...styles.regionName, color: REGION_COLORS[r._id] || '#111' }}>
+                                        {REGION_LABELS[r._id] || r._id?.toUpperCase()}
                                     </span>
                                     <div style={styles.regionStatRow}>
                                         <span>{r.totalStock?.toLocaleString()} units</span>
@@ -159,7 +181,7 @@ const SuperadminDashboard = () => {
                                         borderRadius: '4px',
                                         transition: 'width 0.5s ease',
                                     }}
-                                    title={`${key.toUpperCase()}: ${val.stock} units`}
+                                    title={`${REGION_LABELS[key] || key.toUpperCase()}: ${val.stock} units`}
                                 />
                             ))}
                         </div>
@@ -167,7 +189,7 @@ const SuperadminDashboard = () => {
                             {regionEntries.map(([key, val]) => (
                                 <div key={key} style={styles.legendItem}>
                                     <span style={{ ...styles.legendDot, background: REGION_COLORS[key] }} />
-                                    <span>{key.toUpperCase()} ({Math.round((val.stock / totalGlobalStock) * 100)}%)</span>
+                                    <span>{REGION_LABELS[key] || key.toUpperCase()} ({Math.round((val.stock / totalGlobalStock) * 100)}%)</span>
                                 </div>
                             ))}
                         </div>
@@ -186,22 +208,22 @@ const SuperadminDashboard = () => {
                                 borderLeft: `3px solid ${REGION_COLORS[key]}`,
                             }}>
                                 <span style={{ ...styles.regionName, color: REGION_COLORS[key] }}>
-                                    {key.toUpperCase()}
+                                    {REGION_LABELS[key] || key.toUpperCase()}
                                 </span>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.9rem', color: '#8892b0' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.9rem', color: '#666' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <span>Stock</span>
-                                        <strong style={{ color: '#ccd6f6' }}>{val.stock?.toLocaleString()}</strong>
+                                        <strong style={{ color: '#111' }}>{val.stock?.toLocaleString()}</strong>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <span>Value</span>
-                                        <strong style={{ color: '#00c864' }}>
+                                        <strong style={{ color: '#00A854' }}>
                                             {CURRENCY_SYMBOLS[val.currency]}{val.inventoryValue?.toLocaleString()}
                                         </strong>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                         <span>Low Stock</span>
-                                        <strong style={{ color: val.lowStockCount > 0 ? '#ffa726' : '#ccd6f6' }}>
+                                        <strong style={{ color: val.lowStockCount > 0 ? '#F5A623' : '#111' }}>
                                             {val.lowStockCount}
                                         </strong>
                                     </div>
@@ -212,7 +234,7 @@ const SuperadminDashboard = () => {
 
                     <div style={{ ...styles.statCard, marginTop: '1.5rem', textAlign: 'center' }}>
                         <span style={styles.statLabel}>Global Inventory Value (USD equivalent concept)</span>
-                        <span style={{ ...styles.statValue, color: '#00c864', fontSize: '2.2rem' }}>
+                        <span style={{ ...styles.statValue, color: '#00A854', fontSize: '2.2rem' }}>
                             ${analytics.globalInventoryValue?.toLocaleString()}
                         </span>
                     </div>
@@ -224,7 +246,7 @@ const SuperadminDashboard = () => {
                 <section style={styles.section}>
                     <h2 style={styles.sectionTitle}>
                         ⚠️ Low Stock Alerts
-                        <span style={{ fontSize: '0.8rem', color: '#8892b0', fontWeight: '400', marginLeft: '0.5rem' }}>
+                        <span style={{ fontSize: '0.8rem', color: '#666', fontWeight: '400', marginLeft: '0.5rem' }}>
                             (threshold: ≤{lowStock.threshold})
                         </span>
                     </h2>
@@ -232,8 +254,8 @@ const SuperadminDashboard = () => {
                     {Object.entries(lowStock.lowStockByRegion || {}).map(([region, data]) => (
                         <div key={region} style={{ marginBottom: '2rem' }}>
                             <h3 style={{ color: REGION_COLORS[region], fontSize: '1.1rem', marginBottom: '0.8rem' }}>
-                                {region.toUpperCase()}
-                                <span style={{ fontSize: '0.8rem', color: '#8892b0', marginLeft: '0.5rem' }}>
+                                {REGION_LABELS[region] || region.toUpperCase()}
+                                <span style={{ fontSize: '0.8rem', color: '#666', marginLeft: '0.5rem' }}>
                                     ({data.count} items)
                                 </span>
                             </h3>
@@ -242,15 +264,15 @@ const SuperadminDashboard = () => {
                                     {data.products.map(p => (
                                         <div key={p._id} style={{
                                             ...styles.lowStockCard,
-                                            borderLeft: `3px solid ${p.status === 'out_of_stock' ? '#ff6b6b' : '#ffa726'}`,
+                                            borderLeft: `3px solid ${p.status === 'out_of_stock' ? '#E74C3C' : '#F5A623'}`,
                                         }}>
                                             <div style={{ flex: 1 }}>
-                                                <strong style={{ color: '#ccd6f6', fontSize: '0.9rem' }}>{p.name}</strong>
+                                                <strong style={{ color: '#111', fontSize: '0.9rem' }}>{p.name}</strong>
                                             </div>
                                             <span style={{
                                                 ...styles.stockBadge,
-                                                background: p.status === 'out_of_stock' ? 'rgba(255,70,70,0.15)' : 'rgba(255,167,38,0.15)',
-                                                color: p.status === 'out_of_stock' ? '#ff6b6b' : '#ffa726',
+                                                background: p.status === 'out_of_stock' ? 'rgba(231,76,60,0.1)' : 'rgba(245,166,35,0.1)',
+                                                color: p.status === 'out_of_stock' ? '#E74C3C' : '#F5A623',
                                             }}>
                                                 {p.stock} units
                                             </span>
@@ -258,7 +280,7 @@ const SuperadminDashboard = () => {
                                     ))}
                                 </div>
                             ) : (
-                                <p style={{ color: '#00c864', fontSize: '0.85rem' }}>✅ All stocked</p>
+                                <p style={{ color: '#00A854', fontSize: '0.85rem' }}>✅ All stocked</p>
                             )}
                         </div>
                     ))}
@@ -271,9 +293,9 @@ const SuperadminDashboard = () => {
                     {actionMsg && (
                         <div style={{
                             padding: '0.8rem', marginBottom: '1rem', borderRadius: '8px',
-                            background: actionMsg.type === 'success' ? 'rgba(0,255,100,0.1)' : 'rgba(255,0,0,0.1)',
-                            color: actionMsg.type === 'success' ? '#00ff64' : '#ff6b6b',
-                            border: `1px solid ${actionMsg.type === 'success' ? 'rgba(0,255,100,0.2)' : 'rgba(255,0,0,0.2)'}`,
+                            background: actionMsg.type === 'success' ? 'rgba(0, 168, 84, 0.1)' : 'rgba(231, 76, 60, 0.1)',
+                            color: actionMsg.type === 'success' ? '#00A854' : '#E74C3C',
+                            border: `1px solid ${actionMsg.type === 'success' ? 'rgba(0, 168, 84, 0.2)' : 'rgba(231, 76, 60, 0.2)'}`,
                         }}>
                             {actionMsg.text}
                         </div>
@@ -286,11 +308,11 @@ const SuperadminDashboard = () => {
                                 {dashboard.admins.map(admin => (
                                     <div key={admin._id} style={styles.adminCard}>
                                         <div>
-                                            <strong style={{ color: '#ccd6f6' }}>{admin.name}</strong>
-                                            <p style={{ fontSize: '0.85rem', color: '#8892b0', margin: '0.2rem 0 0' }}>{admin.email}</p>
+                                            <strong style={{ color: '#111' }}>{admin.name}</strong>
+                                            <p style={{ fontSize: '0.85rem', color: '#666', margin: '0.2rem 0 0' }}>{admin.email}</p>
                                         </div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                            <span style={styles.regionBadge}>{admin.region?.toUpperCase()}</span>
+                                            <span style={styles.regionBadge}>{ADMIN_REGION_LABELS[admin.region] || admin.region?.toUpperCase()}</span>
                                             <button onClick={() => handleDeleteAdmin(admin._id, admin.email)} style={styles.deleteBtn}>
                                                 ✕ Remove
                                             </button>
@@ -299,7 +321,7 @@ const SuperadminDashboard = () => {
                                 ))}
                             </div>
                         ) : (
-                            <p style={{ color: '#8892b0' }}>No admins created yet.</p>
+                            <p style={{ color: '#666' }}>No admins created yet.</p>
                         )}
                     </section>
 
@@ -313,14 +335,17 @@ const SuperadminDashboard = () => {
                             <input type="password" placeholder="Password" value={formData.password}
                                 onChange={e => setFormData({ ...formData, password: e.target.value })} required style={styles.input} />
                             <select value={formData.region} onChange={e => setFormData({ ...formData, region: e.target.value })} style={styles.input}>
-                                <option value="US">🇺🇸 United States</option>
-                                <option value="GB">🇬🇧 United Kingdom</option>
-                                <option value="FR">🇫🇷 France</option>
-                                <option value="DE">🇩🇪 Germany</option>
-                                <option value="JP">🇯🇵 Japan</option>
-                                <option value="AU">🇦🇺 Australia</option>
-                                <option value="IN">🇮🇳 India</option>
-                                <option value="AE">🇦🇪 UAE</option>
+                                {Object.entries(ADMIN_REGION_LABELS)
+                                    .filter(([val]) => !(dashboard?.admins?.map(a => a.region) || []).includes(val))
+                                    .map(([val, label]) => (
+                                        <option key={val} value={val}>{label}</option>
+                                    ))}
+                                {(!dashboard?.admins ||
+                                    ['US', 'GB', 'FR', 'DE', 'JP', 'AU', 'IN', 'AE'].every(r =>
+                                        dashboard.admins.map(a => a.region).includes(r)
+                                    )) && (
+                                        <option value="">No regions available</option>
+                                    )}
                             </select>
                             <button type="submit" style={styles.submitBtn} disabled={creating}>
                                 {creating ? 'Creating...' : 'Create Admin'}
@@ -336,117 +361,121 @@ const SuperadminDashboard = () => {
 const styles = {
     container: {
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%)',
-        color: '#ffffff', fontFamily: "'Inter', sans-serif", padding: '2rem',
+        background: '#F7F7F5',
+        color: '#111', fontFamily: "'Inter', sans-serif", padding: '3rem',
     },
     header: {
         display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-        marginBottom: '1.5rem', paddingBottom: '1.5rem',
-        borderBottom: '1px solid rgba(255,255,255,0.1)',
+        marginBottom: '2rem', paddingBottom: '2rem',
+        borderBottom: '1px solid rgba(0,0,0,0.1)',
     },
     title: {
-        fontSize: '2rem', fontWeight: '700', margin: '0 0 0.5rem 0',
-        background: 'linear-gradient(135deg, #f093fb, #f5576c)',
-        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+        fontSize: '2.5rem', fontWeight: '700', margin: '0 0 0.5rem 0',
+        fontFamily: "'Playfair Display', serif",
+        color: '#111', letterSpacing: '-0.02em',
     },
-    subtitle: { fontSize: '0.95rem', color: '#8892b0', margin: 0 },
+    subtitle: { fontSize: '1rem', color: '#666', margin: 0, textTransform: 'uppercase', letterSpacing: '0.05em' },
     backBtn: {
-        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)',
-        color: '#ccd6f6', padding: '0.6rem 1.2rem', borderRadius: '8px',
-        cursor: 'pointer', fontSize: '0.9rem',
+        background: '#fff', border: '1px solid #e0e0e0',
+        color: '#111', padding: '0.8rem 1.5rem', borderRadius: '4px',
+        cursor: 'pointer', fontSize: '0.9rem', fontWeight: '500', transition: 'all 0.2s ease',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
     },
     tabBar: {
-        display: 'flex', gap: '0.5rem', marginBottom: '2rem',
-        borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.5rem',
+        display: 'flex', gap: '1rem', marginBottom: '3rem',
+        borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '1rem',
         flexWrap: 'wrap',
     },
     tab: {
-        background: 'transparent', border: 'none', color: '#8892b0',
-        padding: '0.6rem 1.2rem', borderRadius: '6px', cursor: 'pointer',
-        fontSize: '0.9rem', fontWeight: '500', transition: 'all 0.2s',
+        background: 'transparent', border: 'none', color: '#666',
+        padding: '0.8rem 1.5rem', borderRadius: '4px', cursor: 'pointer',
+        fontSize: '0.95rem', fontWeight: '500', transition: 'all 0.3s ease',
     },
-    tabActive: { background: 'rgba(240, 147, 251, 0.15)', color: '#f093fb' },
+    tabActive: { background: '#111', color: '#fff' },
     statsGrid: {
-        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-        gap: '1.2rem', marginBottom: '2.5rem',
+        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+        gap: '1.5rem', marginBottom: '3rem',
     },
     statCard: {
-        background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: '12px', padding: '1.5rem',
-        display: 'flex', flexDirection: 'column', gap: '0.5rem',
+        background: '#fff', border: '1px solid #eaeaea',
+        borderRadius: '8px', padding: '2rem',
+        display: 'flex', flexDirection: 'column', gap: '0.8rem',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.02)'
     },
-    statLabel: { fontSize: '0.8rem', color: '#8892b0', textTransform: 'uppercase', letterSpacing: '0.05em' },
-    statValue: { fontSize: '1.8rem', fontWeight: '700', color: '#ccd6f6' },
-    section: { marginBottom: '2.5rem' },
-    sectionTitle: { fontSize: '1.3rem', fontWeight: '600', marginBottom: '1.2rem', color: '#ccd6f6' },
+    statLabel: { fontSize: '0.85rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: '600' },
+    statValue: { fontSize: '2.5rem', fontWeight: '700', color: '#111', fontFamily: "'Playfair Display', serif" },
+    section: { marginBottom: '3.5rem' },
+    sectionTitle: { fontSize: '1.5rem', fontWeight: '600', marginBottom: '1.5rem', color: '#111', fontFamily: "'Playfair Display', serif" },
     regionGrid: {
-        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem',
+        display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem',
     },
     regionCard: {
-        background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: '10px', padding: '1.2rem',
+        background: '#fff', border: '1px solid #eaeaea',
+        borderRadius: '8px', padding: '1.5rem',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
     },
     regionName: {
-        fontSize: '1.1rem', fontWeight: '700', display: 'block', marginBottom: '0.8rem',
+        fontSize: '1.2rem', fontWeight: '700', display: 'block', marginBottom: '1rem', color: '#111'
     },
     regionStatRow: {
         display: 'flex', justifyContent: 'space-between',
-        fontSize: '0.85rem', color: '#8892b0',
+        fontSize: '0.95rem', color: '#444', fontWeight: '500'
     },
     distributionBar: {
-        display: 'flex', gap: '3px', height: '24px',
-        background: 'rgba(255,255,255,0.05)', borderRadius: '6px',
-        overflow: 'hidden', padding: '3px',
+        display: 'flex', gap: '4px', height: '32px',
+        background: '#e0e0e0', borderRadius: '8px',
+        overflow: 'hidden', padding: '4px',
     },
     legendRow: {
-        display: 'flex', gap: '1.5rem', marginTop: '0.8rem', flexWrap: 'wrap',
+        display: 'flex', gap: '2rem', marginTop: '1.5rem', flexWrap: 'wrap',
     },
     legendItem: {
-        display: 'flex', alignItems: 'center', gap: '0.4rem',
-        fontSize: '0.8rem', color: '#8892b0',
+        display: 'flex', alignItems: 'center', gap: '0.5rem',
+        fontSize: '0.9rem', color: '#444', fontWeight: '500'
     },
     legendDot: {
-        width: '10px', height: '10px', borderRadius: '50%', display: 'inline-block',
+        width: '12px', height: '12px', borderRadius: '50%', display: 'inline-block',
     },
-    adminList: { display: 'flex', flexDirection: 'column', gap: '0.8rem' },
+    adminList: { display: 'flex', flexDirection: 'column', gap: '1rem' },
     adminCard: {
-        background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: '10px', padding: '1rem 1.2rem',
+        background: '#fff', border: '1px solid #eaeaea',
+        borderRadius: '8px', padding: '1.5rem',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
     },
     regionBadge: {
-        background: 'rgba(240, 147, 251, 0.15)', color: '#f093fb',
-        padding: '0.3rem 0.7rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '600',
+        background: '#f4f4f4', color: '#111', border: '1px solid #e0e0e0',
+        padding: '0.4rem 1rem', borderRadius: '20px', fontSize: '0.85rem', fontWeight: '600',
     },
     deleteBtn: {
-        background: 'rgba(255, 70, 70, 0.1)', border: '1px solid rgba(255, 70, 70, 0.3)',
-        color: '#ff6b6b', padding: '0.3rem 0.7rem', borderRadius: '6px',
-        fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer',
+        background: '#fff', border: '1px solid #ff4d4d',
+        color: '#ff4d4d', padding: '0.4rem 1rem', borderRadius: '20px',
+        fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s',
     },
-    form: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', maxWidth: '600px' },
+    form: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', maxWidth: '700px', background: '#fff', padding: '2rem', borderRadius: '8px', border: '1px solid #eaeaea' },
     input: {
-        background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)',
-        borderRadius: '8px', padding: '0.75rem 1rem', color: '#ccd6f6',
-        fontSize: '0.9rem', outline: 'none',
+        background: '#f9f9f9', border: '1px solid #e0e0e0',
+        borderRadius: '4px', padding: '1rem', color: '#111',
+        fontSize: '0.95rem', outline: 'none', transition: 'border-color 0.2s',
     },
     submitBtn: {
         gridColumn: '1 / -1',
-        background: 'linear-gradient(135deg, #f093fb, #f5576c)', border: 'none',
-        borderRadius: '8px', padding: '0.8rem', color: '#fff',
-        fontWeight: '600', fontSize: '0.95rem', cursor: 'pointer',
+        background: '#111', border: 'none',
+        borderRadius: '4px', padding: '1rem', color: '#fff',
+        fontWeight: '600', fontSize: '1rem', cursor: 'pointer', transition: 'background 0.2s'
     },
-    lowStockList: { display: 'flex', flexDirection: 'column', gap: '0.5rem' },
+    lowStockList: { display: 'flex', flexDirection: 'column', gap: '1rem' },
     lowStockCard: {
-        background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: '8px', padding: '0.8rem 1rem',
+        background: '#fff', border: '1px solid #eaeaea',
+        borderRadius: '8px', padding: '1.2rem',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
     },
     stockBadge: {
-        padding: '0.3rem 0.7rem', borderRadius: '6px',
-        fontSize: '0.8rem', fontWeight: '600',
+        padding: '0.4rem 1rem', borderRadius: '20px',
+        fontSize: '0.85rem', fontWeight: '600',
     },
-    loading: { textAlign: 'center', padding: '4rem', fontSize: '1.1rem', color: '#8892b0' },
-    error: { textAlign: 'center', padding: '4rem', fontSize: '1.1rem', color: '#ff6b6b' },
+    loading: { textAlign: 'center', padding: '5rem', fontSize: '1.2rem', color: '#666' },
+    error: { textAlign: 'center', padding: '5rem', fontSize: '1.2rem', color: '#ff4d4d' },
 };
 
 export default SuperadminDashboard;
