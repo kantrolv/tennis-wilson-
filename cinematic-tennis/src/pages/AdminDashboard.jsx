@@ -26,17 +26,29 @@ const AdminDashboard = () => {
     const [newStockValue, setNewStockValue] = useState('');
     const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
 
+    // For Add Racket
+    const [addingRacket, setAddingRacket] = useState(false);
+    const [newRacket, setNewRacket] = useState({
+        name: '', brand: 'Wilson', model: 'Pro Staff/RF', price: '',
+        category: 'racket', ageGroup: 'Adult', sport: 'tennis',
+        weight: '', balance: '32cm / 7 pts HL', material: 'Graphite Composite',
+        description: '', imageUrl: '', stock: ''
+    });
+
     const token = localStorage.getItem('token');
     const authHeader = { headers: { Authorization: `Bearer ${token}` } };
 
     const fetchData = async () => {
         setLoading(true);
         try {
+            const regionMap = { US: 'usa', IN: 'india', GB: 'uk', AE: 'uae', FR: 'france', DE: 'germany', JP: 'japan', AU: 'australia' };
+            const adminRegion = user?.role === 'superadmin' ? 'all' : (regionMap[user?.region] || 'usa');
+
             const [dashRes, lowStockRes, ordersRes, productsRes] = await Promise.all([
                 axios.get('http://localhost:5001/api/admin/dashboard', authHeader),
                 axios.get('http://localhost:5001/api/admin/low-stock', authHeader),
                 axios.get('http://localhost:5001/api/admin/orders', authHeader),
-                axios.get('http://localhost:5001/api/products'), // Get products to manage stock
+                axios.get(`http://localhost:5001/api/products?region=${adminRegion}`),
             ]);
             setDashboard(dashRes.data);
             setLowStock(lowStockRes.data);
@@ -71,6 +83,45 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleAddRacket = async (e) => {
+        e.preventDefault();
+        setAddingRacket(true);
+        try {
+            const formData = {
+                ...newRacket,
+                price: Number(newRacket.price),
+                weight: Number(newRacket.weight) || 300,
+            };
+
+            // Build stock map for backend
+            if (newRacket.stock && !isNaN(newRacket.stock)) {
+                const stockVal = Number(newRacket.stock);
+                const rMap = { US: 'usa', IN: 'india', GB: 'uk', AE: 'uae', FR: 'france', DE: 'germany', JP: 'japan', AU: 'australia' };
+                const adminRegion = user?.role === 'superadmin' ? 'usa' : (rMap[user?.region] || 'usa');
+                formData.stock = { [adminRegion]: stockVal };
+            }
+
+            // Defaults for grip stock
+            formData.gripStock = { "4 1/4\" (2)": 10, "4 3/8\" (3)": 10 };
+
+            await axios.post('http://localhost:5001/api/admin/add-product', formData, authHeader);
+            setStatusMsg({ type: 'success', text: 'Racket added successfully!' });
+            setNewRacket({
+                name: '', brand: 'Wilson', model: 'Pro Staff/RF', price: '',
+                category: 'racket', ageGroup: 'Adult', sport: 'tennis',
+                weight: '', balance: '32cm / 7 pts HL', material: 'Graphite Composite',
+                description: '', imageUrl: '', stock: ''
+            });
+            fetchData();
+            setTimeout(() => setStatusMsg({ type: '', text: '' }), 3000);
+            setActiveTab('overview');
+        } catch (err) {
+            setStatusMsg({ type: 'error', text: err.response?.data?.message || 'Failed to add racket' });
+        } finally {
+            setAddingRacket(false);
+        }
+    };
+
     if (loading) return <div style={styles.container}><div style={styles.loading}>Initializing Premium Admin Suite...</div></div>;
     if (error) return <div style={styles.container}><div style={styles.error}>❌ {error}</div></div>;
 
@@ -95,7 +146,7 @@ const AdminDashboard = () => {
 
             {/* Tab Navigation */}
             <div style={styles.tabBar}>
-                {['overview', 'inventory', 'orders', 'alerts'].map(tab => (
+                {['overview', 'inventory', 'orders', 'alerts', 'addRacket'].map(tab => (
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
@@ -104,7 +155,7 @@ const AdminDashboard = () => {
                             ...(activeTab === tab ? styles.tabActive : {}),
                         }}
                     >
-                        {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                        {tab === 'addRacket' ? 'Add Racket' : tab.charAt(0).toUpperCase() + tab.slice(1)}
                     </button>
                 ))}
             </div>
@@ -338,6 +389,58 @@ const AdminDashboard = () => {
                             ))}
                         </div>
                     ) : <p style={styles.empty}>✅ All stock levels are optimal.</p>}
+                </section>
+            )}
+
+            {activeTab === 'addRacket' && (
+                <section style={styles.section}>
+                    <h2 style={styles.sectionTitle}>Add New Racket</h2>
+                    <div style={styles.formCard}>
+                        <form onSubmit={handleAddRacket} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Name</label>
+                                <input type="text" style={styles.input} required value={newRacket.name} onChange={e => setNewRacket({ ...newRacket, name: e.target.value })} />
+                            </div>
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Brand</label>
+                                <input type="text" style={styles.input} value={newRacket.brand} onChange={e => setNewRacket({ ...newRacket, brand: e.target.value })} />
+                            </div>
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Model Series</label>
+                                <select style={styles.select} value={newRacket.model} onChange={e => setNewRacket({ ...newRacket, model: e.target.value })}>
+                                    <option value="Pro Staff/RF">Pro Staff/RF</option>
+                                    <option value="Blade">Blade</option>
+                                    <option value="Clash">Clash</option>
+                                    <option value="Ultra">Ultra</option>
+                                    <option value="Shift">Shift</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Price (Local Currency)</label>
+                                <input type="number" style={styles.input} required value={newRacket.price} onChange={e => setNewRacket({ ...newRacket, price: e.target.value })} />
+                            </div>
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Initial Stock</label>
+                                <input type="number" style={styles.input} value={newRacket.stock} onChange={e => setNewRacket({ ...newRacket, stock: e.target.value })} />
+                            </div>
+                            <div style={styles.formGroup}>
+                                <label style={styles.label}>Weight (g)</label>
+                                <input type="number" style={styles.input} value={newRacket.weight} onChange={e => setNewRacket({ ...newRacket, weight: e.target.value })} />
+                            </div>
+                            <div style={{ ...styles.formGroup, gridColumn: '1 / -1' }}>
+                                <label style={styles.label}>Image URL</label>
+                                <input type="url" style={styles.input} required value={newRacket.imageUrl} onChange={e => setNewRacket({ ...newRacket, imageUrl: e.target.value })} />
+                            </div>
+                            <div style={{ ...styles.formGroup, gridColumn: '1 / -1' }}>
+                                <label style={styles.label}>Description</label>
+                                <textarea style={{ ...styles.input, minHeight: '100px', resize: 'vertical' }} required value={newRacket.description} onChange={e => setNewRacket({ ...newRacket, description: e.target.value })} />
+                            </div>
+                            <button type="submit" style={{ ...styles.actionBtn, gridColumn: '1 / -1' }} disabled={addingRacket}>
+                                {addingRacket ? 'Adding...' : 'Add Racket for Regional Store'}
+                            </button>
+                        </form>
+                    </div>
                 </section>
             )}
         </div>
