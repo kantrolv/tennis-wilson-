@@ -34,10 +34,7 @@ export function HTMLOverlay() {
                     display: 'flex', flexDirection: 'column',
                     justifyContent: 'center', alignItems: 'center',
                     zIndex: 20, opacity: 0, pointerEvents: 'none',
-                    color: 'black', // Black text on Beige BG as requested
-                    // User said "ball size should become bigger ... and cover entire screen ... then names should come"
-                    // Tennis ball is usually yellow-green. If it fills screen, background is yellow-green.
-                    // Dark text is good.
+                    color: '#1a1a1a', // Dark text on off-white BG
                 }}
             >
                 <div style={{ mixBlendMode: 'multiply' }}>

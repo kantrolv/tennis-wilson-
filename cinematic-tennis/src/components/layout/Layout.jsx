@@ -16,37 +16,20 @@ const Layout = ({ children }) => {
         if (!mainRef.current || !footerRef.current) return;
 
         const ctx = gsap.context(() => {
-            // Check if we are on the home page by looking for the spacer AND checking URL/path
-            // But relying on DOM element is usually safer for this setup
             const triggerEl = document.querySelector(".cinematic-spacer");
+            const isHome = triggerEl && window.location.pathname === '/';
 
-            // Only run scroll animation if the spacer actually exists and is visible
-            if (triggerEl && window.location.pathname === '/') {
-                // Home Page Animation: Scroll Triggered
-                gsap.fromTo([mainRef.current, footerRef.current],
-                    { autoAlpha: 0, y: 50 },
-                    {
-                        autoAlpha: 1,
-                        y: 0,
-                        duration: 1.5,
-                        ease: "power2.out",
-                        scrollTrigger: {
-                            trigger: triggerEl,
-                            start: "65% top",
-                            end: "80% top",
-                            toggleActions: "play none none reverse",
-                            scrub: 1,
-                            onRefresh: self => {
-                                if (self.progress > 0) {
-                                    gsap.set([mainRef.current, footerRef.current], { autoAlpha: 1, y: 0 });
-                                }
-                            }
-                        }
-                    }
-                );
+            if (isHome) {
+                // HOME PAGE: Content visibility is controlled by Experience.jsx
+                // via the damped scroll progress (not raw scroll position).
+                // We just set initial hidden state here.
+                // Experience.jsx will toggle the 'content-revealed' class on .layout-wrapper
+                // when the damped animation reaches the ball-hit completion point.
+                gsap.set([mainRef.current, footerRef.current], { autoAlpha: 0, y: 50 });
+
+                // No ScrollTrigger here — Experience.jsx handles the timing
             } else {
                 // Standard Page Animation: Immediate Fade In
-                // Kill any existing ScrollTriggers that might be lingering
                 ScrollTrigger.getAll().forEach(t => t.kill());
 
                 gsap.set([mainRef.current, footerRef.current], { autoAlpha: 0, y: 20 });
@@ -56,18 +39,18 @@ const Layout = ({ children }) => {
                     duration: 0.8,
                     ease: "power2.out",
                     delay: 0.1,
-                    clearProps: "all" // Ensure no lingering styles block visibility
+                    clearProps: "all"
                 });
             }
         });
 
-        // Failsafe: Force visibility after 3 seconds if still hidden (e.g. enhanced reliability)
+        // Failsafe: Force visibility after 5 seconds if still hidden
         const timer = setTimeout(() => {
             if (mainRef.current && getComputedStyle(mainRef.current).opacity === '0') {
                 console.warn("GSAP didn't fire, forcing visibility");
                 gsap.to([mainRef.current, footerRef.current], { autoAlpha: 1, y: 0, duration: 0.5 });
             }
-        }, 3000);
+        }, 5000);
 
         return () => {
             ctx.revert();

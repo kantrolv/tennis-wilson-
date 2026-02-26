@@ -6,7 +6,8 @@ gsap.registerPlugin(ScrollTrigger);
 
 // Mutable state 
 export const scrollState = {
-    progress: 0,
+    progress: 0,      // 0-1 progress through the cinematic spacer
+    contentProgress: 0, // 0-1 progress through the content sections (after spacer)
     velocity: 0,
     hit: false
 };
@@ -15,6 +16,7 @@ export function useScroll() {
     useLayoutEffect(() => {
         window.scrollTo(0, 0);
 
+        // Track cinematic spacer progress (0-1 over 600vh)
         const trigger = ScrollTrigger.create({
             trigger: document.querySelector('.cinematic-spacer') || document.body,
             start: 'top top',
@@ -31,13 +33,26 @@ export function useScroll() {
             }
         });
 
+        // Track content sections progress (0-1 over the content area)
+        const contentEl = document.querySelector('.home-content-sections');
+        let contentTrigger;
+        if (contentEl) {
+            contentTrigger = ScrollTrigger.create({
+                trigger: contentEl,
+                start: 'top bottom',    // Start when content top reaches bottom of viewport
+                end: 'bottom bottom',   // End when content bottom reaches bottom of viewport
+                scrub: 0,
+                onUpdate: (self) => {
+                    scrollState.contentProgress = self.progress;
+                }
+            });
+        }
+
         // Input listeners for "The Hit"
         const handleInput = (e) => {
             if (e.type === 'click' || (e.type === 'keydown' && e.code === 'Space')) {
-                if (scrollState.progress > 0.4) { // Only allow hit after descent
+                if (scrollState.progress > 0.4) {
                     scrollState.hit = true;
-                    // Maybe auto-scroll to Act 6?
-                    // window.scrollTo(...) 
                 }
             }
         };
@@ -47,6 +62,7 @@ export function useScroll() {
 
         return () => {
             trigger.kill();
+            if (contentTrigger) contentTrigger.kill();
             window.removeEventListener('click', handleInput);
             window.removeEventListener('keydown', handleInput);
         };

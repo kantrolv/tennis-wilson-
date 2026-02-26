@@ -18,8 +18,8 @@ const Home = () => {
             <div className="webgl-canvas">
                 <Canvas
                     shadows
-                    dpr={[1, 2]} // Quality scaling
-                    camera={{ position: [0, 0, 5], fov: 35 }} // Cinematic FOV
+                    dpr={[1, 2]}
+                    camera={{ position: [0, 0, 5], fov: 35 }}
                     gl={{ antialias: true, alpha: true }}
                 >
                     <Suspense fallback={null}>
@@ -32,12 +32,32 @@ const Home = () => {
             <div className="scroll-container">
                 <Layout>
                     <div className="cinematic-spacer" style={{ height: '600vh' }}></div>
-                    <RacketHero />
-                    <RacketStrings />
-                    <FrameMaterial />
-                    <Performance />
-                    <LegacyPlayers />
-                    <CurrentPlayers />
+                    {/*
+                        Content sections — starts hidden, revealed by Experience.jsx
+                        when the damped animation passes 75%.
+                        
+                        Section layout maps to racket showcase stages:
+                        - Stage 1 (contentProgress 0-0.35): Head & Strings → RacketHero + RacketStrings
+                        - Stage 2 (contentProgress 0.35-0.7): Handle → FrameMaterial
+                        - Stage 3 (contentProgress 0.7-1.0): Full view → Performance + Players
+                    */}
+                    <div className="home-content-sections" style={{
+                        opacity: 0,
+                        visibility: 'hidden',
+                        transform: 'translateY(50px)'
+                    }}>
+                        {/* STAGE 1: Head & Strings (racket shows head up, strings facing viewer) */}
+                        <RacketHero />
+                        <RacketStrings />
+
+                        {/* STAGE 2: Handle (racket rotates to show handle) */}
+                        <FrameMaterial />
+
+                        {/* STAGE 3: Full racket view — Performance & Players */}
+                        <Performance />
+                        <LegacyPlayers />
+                        <CurrentPlayers />
+                    </div>
                 </Layout>
             </div>
 
