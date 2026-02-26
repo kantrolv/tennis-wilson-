@@ -86,6 +86,10 @@ const productSchema = mongoose.Schema({
         germany: { type: Number, default: 0 },
         japan: { type: Number, default: 0 },
         australia: { type: Number, default: 0 },
+    },
+    addedByRegion: {
+        type: String,
+        default: 'global'
     }
 }, {
     timestamps: true

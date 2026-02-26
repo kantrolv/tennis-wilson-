@@ -10,9 +10,18 @@ const path = require('path');
 // @route   GET /api/rackets
 // @access  Public
 const getRackets = asyncHandler(async (req, res) => {
-    const { series, minPrice, maxPrice, ageGroup } = req.query;
+    const { series, minPrice, maxPrice, ageGroup, region } = req.query;
 
     let query = { category: 'racket', sport: 'tennis' };
+
+    if (region) {
+        query.$or = [
+            { addedByRegion: 'global' },
+            { addedByRegion: region }
+        ];
+    } else {
+        query.addedByRegion = 'global';
+    }
 
     // Series Filter (Multiple selection support)
     if (series) {

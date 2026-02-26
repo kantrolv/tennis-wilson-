@@ -12,10 +12,22 @@ const getProducts = asyncHandler(async (req, res) => {
         maxPrice,
         brand,
         weight,
-        keyword
+        keyword,
+        region
     } = req.query;
 
     let query = {};
+
+    if (region) {
+        if (region !== 'all') {
+            query.$or = [
+                { addedByRegion: 'global' },
+                { addedByRegion: region }
+            ];
+        }
+    } else {
+        query.addedByRegion = 'global';
+    }
 
     if (ageGroup) {
         query.ageGroup = ageGroup;

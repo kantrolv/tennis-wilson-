@@ -161,6 +161,13 @@ const addProduct = asyncHandler(async (req, res) => {
         regionalPricing.australia.price = Math.round(Number(price) * 1.5);
     }
 
+    let addedByRegion = 'global';
+    if (req.user.role === 'admin') {
+        addedByRegion = getProductRegion(req.user.region);
+    } else if (req.user.role === 'superadmin' && req.body.region) {
+        addedByRegion = req.body.region;
+    }
+
     const product = await Product.create({
         name, brand, model,
         price: price || regionalPricing.usa.price, // Keep base price for backward compat
@@ -168,6 +175,7 @@ const addProduct = asyncHandler(async (req, res) => {
         category, ageGroup, sport,
         weight, balance, material, gripStock, description, imageUrl,
         stock: regionalStock,
+        addedByRegion,
     });
 
     res.status(201).json(product);
