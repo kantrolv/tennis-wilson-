@@ -53,6 +53,8 @@ const RacketCatalog = ({ onCheckout }) => {
 
                 if (filters.ageGroup && filters.ageGroup !== 'All') params.append('ageGroup', filters.ageGroup);
 
+                params.append('region', backendRegion);
+
                 const { data } = await axios.get(`http://localhost:5001/api/rackets?${params.toString()}`);
                 setRackets(data);
                 setLoading(false);

@@ -2,50 +2,138 @@ import React from 'react';
 
 const RacketStrings = () => {
     return (
-        <section className="section align-left" style={{
-            backgroundColor: '#0d1017' // Slightly different shade for contrast
+        <section className="section align-left" id="racket-strings-section" style={{
+            backgroundColor: 'transparent',
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '4rem 6vw',
+            position: 'relative'
         }}>
-            <div style={{ maxWidth: '600px', marginLeft: '10vw' }}>
-                <h2 className="text-hero" style={{ fontSize: '3rem' }}>
-                    The String Bed.
-                </h2>
-                <h3 className="text-accent">Precision Engineering</h3>
+            <div style={{ maxWidth: '550px', zIndex: 2 }}>
+                <span style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: '0.75rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.25em',
+                    color: 'var(--c-wilson-red)',
+                    fontWeight: 600,
+                    display: 'block',
+                    marginBottom: '1.5rem'
+                }}>
+                    The String Bed
+                </span>
 
-                <p className="text-sub">
-                    Every rally begins here. We've optimized the drilling pattern to
-                    increase the sweet spot by 15%, giving you more power even on off-center hits.
+                <h2 style={{
+                    fontFamily: 'var(--font-serif)',
+                    fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+                    lineHeight: 1.1,
+                    color: '#1a1a1a',
+                    marginBottom: '1.5rem',
+                    fontWeight: 400
+                }}>
+                    Precision<br />
+                    Engineered.
+                </h2>
+
+                <p style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: '1.05rem',
+                    lineHeight: 1.7,
+                    color: '#555',
+                    marginBottom: '2rem',
+                    maxWidth: '450px'
+                }}>
+                    Every rally begins at the string bed. Our optimized 16×19 drilling pattern
+                    increases the sweet spot by 15%, giving you more power even on off-center hits.
+                    The parallel holes reduce string friction for enhanced spin potential.
                 </p>
 
-                <div className="glass-panel" style={{ marginTop: '3rem' }}>
-                    <div style={{ display: 'flex', gap: '2rem', justifyContent: 'space-between' }}>
-                        <div>
-                            <span style={{ display: 'block', fontSize: '2rem', fontWeight: 700, color: 'var(--c-accent)' }}>16x19</span>
-                            <span style={{ fontSize: '0.8rem', textTransform: 'uppercase' }}>String Pattern</span>
-                        </div>
-                        <div>
-                            <span style={{ display: 'block', fontSize: '2rem', fontWeight: 700, color: 'var(--c-accent)' }}>+15%</span>
-                            <span style={{ fontSize: '0.8rem', textTransform: 'uppercase' }}>Sweet Spot</span>
-                        </div>
+                {/* String Specs */}
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr 1fr',
+                    gap: '1.5rem',
+                    marginBottom: '2rem'
+                }}>
+                    <div style={{
+                        borderTop: '2px solid #1a1a1a',
+                        paddingTop: '0.75rem'
+                    }}>
+                        <span style={{
+                            fontFamily: 'var(--font-serif)',
+                            fontSize: '1.8rem',
+                            color: '#1a1a1a',
+                            fontWeight: 700,
+                            display: 'block'
+                        }}>16×19</span>
+                        <span style={{
+                            fontFamily: 'var(--font-sans)',
+                            fontSize: '0.7rem',
+                            textTransform: 'uppercase',
+                            color: '#888',
+                            letterSpacing: '0.1em'
+                        }}>String Pattern</span>
+                    </div>
+                    <div style={{
+                        borderTop: '2px solid #1a1a1a',
+                        paddingTop: '0.75rem'
+                    }}>
+                        <span style={{
+                            fontFamily: 'var(--font-serif)',
+                            fontSize: '1.8rem',
+                            color: '#1a1a1a',
+                            fontWeight: 700,
+                            display: 'block'
+                        }}>+15%</span>
+                        <span style={{
+                            fontFamily: 'var(--font-sans)',
+                            fontSize: '0.7rem',
+                            textTransform: 'uppercase',
+                            color: '#888',
+                            letterSpacing: '0.1em'
+                        }}>Sweet Spot</span>
+                    </div>
+                    <div style={{
+                        borderTop: '2px solid #1a1a1a',
+                        paddingTop: '0.75rem'
+                    }}>
+                        <span style={{
+                            fontFamily: 'var(--font-serif)',
+                            fontSize: '1.8rem',
+                            color: '#1a1a1a',
+                            fontWeight: 700,
+                            display: 'block'
+                        }}>50-60</span>
+                        <span style={{
+                            fontFamily: 'var(--font-sans)',
+                            fontSize: '0.7rem',
+                            textTransform: 'uppercase',
+                            color: '#888',
+                            letterSpacing: '0.1em'
+                        }}>Tension (lbs)</span>
                     </div>
                 </div>
-            </div>
 
-            {/* Visual element would be on the right: Close up of strings */}
-            <div style={{
-                position: 'absolute',
-                right: '10%',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: '400px',
-                height: '400px',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0) 70%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-            }}>
-                <span style={{ opacity: 0.3, fontStyle: 'italic' }}>Strings Visual</span>
+                {/* Quote */}
+                <div style={{
+                    background: 'rgba(0, 0, 0, 0.03)',
+                    borderLeft: '3px solid #1a1a1a',
+                    padding: '1.25rem 1.5rem',
+                    borderRadius: '0 4px 4px 0'
+                }}>
+                    <p style={{
+                        fontFamily: 'var(--font-serif)',
+                        fontStyle: 'italic',
+                        fontSize: '1rem',
+                        color: '#333',
+                        lineHeight: 1.6,
+                        margin: 0
+                    }}>
+                        "The string bed is where feel meets power. We engineered every
+                        grommet for optimal string movement."
+                    </p>
+                </div>
             </div>
         </section>
     );

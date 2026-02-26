@@ -2,56 +2,101 @@ import React from 'react';
 
 const RacketHero = () => {
     return (
-        <section className="section align-center" style={{
-            backgroundColor: 'var(--c-bg-main)',
-            paddingTop: 'calc(var(--spacing-xl) + 4rem)', // Extra padding for transition
+        <section className="section align-left" id="racket-head-section" style={{
+            backgroundColor: 'transparent',
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '4rem 6vw',
             position: 'relative'
         }}>
-            <div style={{ maxWidth: '800px', margin: '0 auto', zIndex: 2 }}>
-                <h1 className="text-hero" style={{
-                    opacity: 0,
-                    animation: 'fadeInUp 1s ease-out forwards',
-                    animationDelay: '0.2s'
+            {/* Content on the LEFT side — Racket 3D is on the RIGHT (managed by Experience.jsx) */}
+            <div style={{ maxWidth: '550px', zIndex: 2 }}>
+                <span style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: '0.75rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.25em',
+                    color: 'var(--c-wilson-red)',
+                    fontWeight: 600,
+                    display: 'block',
+                    marginBottom: '1.5rem'
                 }}>
-                    Designed for <span style={{ color: 'var(--c-accent)' }}>control</span>. <br />
-                    Built for <span style={{ color: 'var(--c-accent)' }}>precision</span>.
-                </h1>
+                    The Head
+                </span>
 
-                <p className="text-sub" style={{
-                    margin: '0 auto 3rem',
-                    opacity: 0,
-                    animation: 'fadeInUp 1s ease-out forwards',
-                    animationDelay: '0.4s'
+                <h2 style={{
+                    fontFamily: 'var(--font-serif)',
+                    fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+                    lineHeight: 1.1,
+                    color: '#1a1a1a',
+                    marginBottom: '1.5rem',
+                    fontWeight: 400
                 }}>
-                    The Wilson Blade v9. Engineered for the players who demand feedback and control.
-                    Experience the feel of the game like never before.
+                    100 sq in. of<br />
+                    Pure Control.
+                </h2>
+
+                <p style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: '1.05rem',
+                    lineHeight: 1.7,
+                    color: '#555',
+                    marginBottom: '2rem',
+                    maxWidth: '450px'
+                }}>
+                    The oversized head provides a generous sweet spot while maintaining
+                    the precision that advanced players demand. The isometric head shape
+                    expands the hitting area by 20% compared to traditional frames.
                 </p>
 
-                <button className="btn-primary" style={{
-                    opacity: 0,
-                    animation: 'fadeInUp 1s ease-out forwards',
-                    animationDelay: '0.6s'
+                {/* Specs Grid */}
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '1.5rem',
+                    marginBottom: '2rem'
                 }}>
-                    Discover the Blade
-                </button>
+                    <div style={{
+                        borderTop: '2px solid #1a1a1a',
+                        paddingTop: '0.75rem'
+                    }}>
+                        <span style={{
+                            fontFamily: 'var(--font-serif)',
+                            fontSize: '2rem',
+                            color: '#1a1a1a',
+                            fontWeight: 700,
+                            display: 'block'
+                        }}>100</span>
+                        <span style={{
+                            fontFamily: 'var(--font-sans)',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            color: '#888',
+                            letterSpacing: '0.1em'
+                        }}>Sq. Inches</span>
+                    </div>
+                    <div style={{
+                        borderTop: '2px solid #1a1a1a',
+                        paddingTop: '0.75rem'
+                    }}>
+                        <span style={{
+                            fontFamily: 'var(--font-serif)',
+                            fontSize: '2rem',
+                            color: '#1a1a1a',
+                            fontWeight: 700,
+                            display: 'block'
+                        }}>+20%</span>
+                        <span style={{
+                            fontFamily: 'var(--font-sans)',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            color: '#888',
+                            letterSpacing: '0.1em'
+                        }}>Hitting Area</span>
+                    </div>
+                </div>
             </div>
-
-            {/* Placeholder for Racket Image/3D if needed here, 
-          but we are coming from a 3D intro so maybe just text is cleaner initially 
-      */}
-
-            <style>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
         </section>
     );
 };
