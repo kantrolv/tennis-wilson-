@@ -2,41 +2,140 @@ import React from 'react';
 
 const FrameMaterial = () => {
     return (
-        <section className="section align-right" style={{
-            background: 'linear-gradient(to left, var(--c-bg-main), #081226)'
+        <section className="section align-left" id="racket-handle-section" style={{
+            backgroundColor: 'transparent',
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '4rem 6vw',
+            position: 'relative'
         }}>
-            <div style={{ maxWidth: '600px', marginRight: '10vw', textAlign: 'right' }}>
-                <h2 className="text-hero" style={{ fontSize: '3rem' }}>
-                    Braided Graphite.
-                </h2>
-                <h3 className="text-accent" style={{ justifyContent: 'flex-end', display: 'flex' }}>Material Science</h3>
+            <div style={{ maxWidth: '550px', zIndex: 2 }}>
+                <span style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: '0.75rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.25em',
+                    color: 'var(--c-wilson-red)',
+                    fontWeight: 600,
+                    display: 'block',
+                    marginBottom: '1.5rem'
+                }}>
+                    The Handle
+                </span>
 
-                <p className="text-sub" style={{ marginLeft: 'auto' }}>
-                    Graphite gives strength without weight. Our proprietary braiding technology
-                    aligns fibers at 45 degrees to enhance ball pocketing and stability.
+                <h2 style={{
+                    fontFamily: 'var(--font-serif)',
+                    fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+                    lineHeight: 1.1,
+                    color: '#1a1a1a',
+                    marginBottom: '1.5rem',
+                    fontWeight: 400
+                }}>
+                    Where Feel<br />
+                    Begins.
+                </h2>
+
+                <p style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: '1.05rem',
+                    lineHeight: 1.7,
+                    color: '#555',
+                    marginBottom: '2rem',
+                    maxWidth: '450px'
+                }}>
+                    The handle is your only connection to the racket. Wilson's proprietary
+                    CounterVail™ technology in the handle dampens up to 40% of shock vibration
+                    without sacrificing power or feel. The ergonomic grip shape reduces fatigue
+                    during long matches.
                 </p>
 
-                <div className="glass-panel" style={{ marginTop: '3rem', textAlign: 'left' }}>
-                    <p style={{ fontStyle: 'italic', opacity: 0.8 }}>
-                        "Balance without compromise. The frame feels alive in your hand."
-                    </p>
+                {/* Handle Specs */}
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '1.5rem',
+                    marginBottom: '2rem'
+                }}>
+                    <div style={{
+                        borderTop: '2px solid #1a1a1a',
+                        paddingTop: '0.75rem'
+                    }}>
+                        <span style={{
+                            fontFamily: 'var(--font-serif)',
+                            fontSize: '2rem',
+                            color: '#1a1a1a',
+                            fontWeight: 700,
+                            display: 'block'
+                        }}>-40%</span>
+                        <span style={{
+                            fontFamily: 'var(--font-sans)',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            color: '#888',
+                            letterSpacing: '0.1em'
+                        }}>Vibration</span>
+                    </div>
+                    <div style={{
+                        borderTop: '2px solid #1a1a1a',
+                        paddingTop: '0.75rem'
+                    }}>
+                        <span style={{
+                            fontFamily: 'var(--font-serif)',
+                            fontSize: '2rem',
+                            color: '#1a1a1a',
+                            fontWeight: 700,
+                            display: 'block'
+                        }}>4¼"</span>
+                        <span style={{
+                            fontFamily: 'var(--font-sans)',
+                            fontSize: '0.75rem',
+                            textTransform: 'uppercase',
+                            color: '#888',
+                            letterSpacing: '0.1em'
+                        }}>Grip Size</span>
+                    </div>
                 </div>
-            </div>
 
-            {/* Visual element on left */}
-            <div style={{
-                position: 'absolute',
-                left: '10%',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: '300px',
-                height: '600px',
-                border: '1px solid rgba(212, 175, 55, 0.2)', // Gold tint
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-            }}>
-                <span style={{ opacity: 0.3, fontStyle: 'italic' }}>Frame Structure Visual</span>
+                {/* Material callout */}
+                <div style={{
+                    display: 'flex',
+                    gap: '1rem',
+                    alignItems: 'flex-start',
+                    padding: '1.25rem',
+                    background: 'rgba(0, 0, 0, 0.03)',
+                    borderRadius: '6px'
+                }}>
+                    <div style={{
+                        width: '3px',
+                        height: '100%',
+                        minHeight: '60px',
+                        backgroundColor: 'var(--c-wilson-red)',
+                        borderRadius: '2px',
+                        flexShrink: 0
+                    }}></div>
+                    <div>
+                        <h4 style={{
+                            fontFamily: 'var(--font-sans)',
+                            fontSize: '0.85rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.1em',
+                            color: '#1a1a1a',
+                            marginBottom: '0.5rem',
+                            fontWeight: 600
+                        }}>CounterVail™ Technology</h4>
+                        <p style={{
+                            fontFamily: 'var(--font-sans)',
+                            fontSize: '0.9rem',
+                            color: '#666',
+                            lineHeight: 1.6,
+                            margin: 0
+                        }}>
+                            Embedded carbon fibers absorb impact energy, channeling it
+                            back into your swing instead of your arm. Play longer. Hit harder.
+                        </p>
+                    </div>
+                </div>
             </div>
         </section>
     );

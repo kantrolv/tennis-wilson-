@@ -9,9 +9,9 @@ const Performance = () => {
     ];
 
     return (
-        <section className="section align-center" style={{ backgroundColor: '#050a14' }}>
-            <h2 className="text-hero">Let the racket disappear.</h2>
-            <p className="text-sub" style={{ marginBottom: '4rem' }}>
+        <section className="section align-center" style={{ backgroundColor: 'transparent' }}>
+            <h2 className="text-hero" style={{ color: '#1a1a1a' }}>Let the racket disappear.</h2>
+            <p className="text-sub" style={{ marginBottom: '4rem', color: '#555' }}>
                 Only the shot remains. Calibrated for the modern game.
             </p>
 
@@ -27,7 +27,7 @@ const Performance = () => {
                         <div style={{
                             height: '200px',
                             width: '10px',
-                            background: 'rgba(255,255,255,0.1)',
+                            background: 'rgba(0,0,0,0.08)',
                             margin: '0 auto 1rem',
                             position: 'relative',
                             borderRadius: '5px',
@@ -39,7 +39,7 @@ const Performance = () => {
                                 left: 0,
                                 width: '100%',
                                 height: `${m.value}%`,
-                                backgroundColor: 'var(--c-accent)',
+                                backgroundColor: '#1a1a1a',
                                 transition: 'height 1s ease-out'
                             }}></div>
                         </div>
@@ -47,9 +47,10 @@ const Performance = () => {
                             fontFamily: 'var(--font-sans)',
                             textTransform: 'uppercase',
                             letterSpacing: '0.1em',
-                            fontSize: '0.9rem'
+                            fontSize: '0.9rem',
+                            color: '#1a1a1a'
                         }}>{m.label}</h4>
-                        <span style={{ opacity: 0.5, fontSize: '0.8rem' }}>{m.value}/100</span>
+                        <span style={{ opacity: 0.5, fontSize: '0.8rem', color: '#555' }}>{m.value}/100</span>
                     </div>
                 ))}
             </div>
