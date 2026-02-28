@@ -155,12 +155,11 @@ const ProductDetails = () => {
                                 src={getOptimizedUrl(product.imageUrl)}
                                 alt={product.name}
                                 style={{
-                                    height: '80%',
-                                    width: '100%',
+                                    height: '85%',
+                                    width: 'auto',
                                     objectFit: 'contain',
-                                    filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.15))',
-                                    imageRendering: 'high-quality',
-                                    padding: '2rem'
+                                    filter: 'drop-shadow(0 40px 80px rgba(0,0,0,0.2))',
+                                    transform: 'scale(1.1)'
                                 }}
                             />
                         ) : (
