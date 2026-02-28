@@ -10,8 +10,6 @@ const Rackets = () => {
                 {/* Catalog handles its own padding/layout styling now */}
                 <RacketCatalog />
             </Layout>
-
-            <Loader />
         </div>
     );
 };

@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 import AuthContext from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
@@ -10,6 +10,9 @@ const Header = () => {
   const { user, logout } = useContext(AuthContext);
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isRacketsPage = location.pathname.startsWith('/rackets');
 
   const handleLogout = () => {
     logout();
@@ -23,7 +26,7 @@ const Header = () => {
 
   return (
     <header style={{
-      position: 'fixed',
+      position: isRacketsPage ? 'absolute' : 'fixed',
       top: 0,
       left: 0,
       width: '100%',

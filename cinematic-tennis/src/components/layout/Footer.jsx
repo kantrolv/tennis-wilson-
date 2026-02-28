@@ -46,18 +46,13 @@ const Footer = () => {
                         <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: accentColor }}>Shop</h4>
                         <ul style={{ listStyle: 'none', color: mutedColor, lineHeight: '2' }}>
                             <li>Rackets</li>
-                            <li>Strings</li>
-                            <li>Bags</li>
-                            <li>Apparel</li>
                         </ul>
                     </div>
                     <div>
                         <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: accentColor }}>Support</h4>
                         <ul style={{ listStyle: 'none', color: mutedColor, lineHeight: '2' }}>
-                            <li>Contact Us</li>
-                            <li>Shipping</li>
-                            <li>Returns</li>
-                            <li>Warranty</li>
+                            <li>Contact Us: wilson@gmail.com</li>
+
                         </ul>
                     </div>
                 </div>

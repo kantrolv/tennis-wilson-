@@ -113,6 +113,14 @@ const ProductDetails = () => {
     const coverAddon = selectedCover ? formatAddonPrice(selectedCover.price, product, region) : { amount: 0 };
     const totalPrice = basePrice + stringAddon.amount + coverAddon.amount;
 
+    const getOptimizedUrl = (url) => {
+        if (!url) return url;
+        if (url.includes('cloudinary.com') && url.includes('/upload/')) {
+            return url.replace('/upload/', '/upload/f_auto,q_100,w_1000/');
+        }
+        return url;
+    };
+
     return (
         <Layout>
             <div style={{ backgroundColor: '#F7F7F5', minHeight: '100vh', paddingTop: 'var(--header-height)' }}>
@@ -144,14 +152,15 @@ const ProductDetails = () => {
                     }}>
                         {product.imageUrl ? (
                             <img
-                                src={product.imageUrl}
+                                src={getOptimizedUrl(product.imageUrl)}
                                 alt={product.name}
                                 style={{
-                                    height: '85%',
-                                    width: 'auto',
+                                    height: '80%',
+                                    width: '100%',
                                     objectFit: 'contain',
-                                    filter: 'drop-shadow(0 40px 80px rgba(0,0,0,0.2))', // Dramatic shadow
-                                    transform: 'scale(1.1)' // Removed rotation for straight look
+                                    filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.15))',
+                                    imageRendering: 'high-quality',
+                                    padding: '2rem'
                                 }}
                             />
                         ) : (
@@ -374,9 +383,7 @@ const ProductDetails = () => {
                         }}>
                             Overview
                         </span>
-                        <span style={{ display: 'inline-block', padding: '1rem 0', color: '#000', opacity: 0.6 }}>
-                            Features
-                        </span>
+
                     </div>
                     <div>
                         <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', marginBottom: '1rem', color: '#000' }}>Dominate with Precision.</h3>
