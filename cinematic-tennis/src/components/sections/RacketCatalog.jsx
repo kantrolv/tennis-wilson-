@@ -169,13 +169,25 @@ const RacketCatalog = ({ onCheckout }) => {
                         <button
                             onClick={clearFilters}
                             style={{
-                                background: 'transparent',
+                                background: '#f3f4f6',
                                 border: 'none',
-                                textDecoration: 'underline',
                                 cursor: 'pointer',
-                                fontSize: '0.85rem',
-                                color: '#666'
-                            }}>
+                                fontSize: '0.8rem',
+                                fontWeight: '600',
+                                color: '#4b5563',
+                                padding: '0.4rem 0.8rem',
+                                borderRadius: '6px',
+                                transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = '#e5e7eb';
+                                e.currentTarget.style.color = '#051025';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = '#f3f4f6';
+                                e.currentTarget.style.color = '#4b5563';
+                            }}
+                        >
                             Reset
                         </button>
                     </div>
@@ -226,41 +238,41 @@ const RacketCatalog = ({ onCheckout }) => {
                     <div className="filter-group">
                         <div className="filter-title">Price Range</div>
                         <div className="price-inputs">
-                            <input
-                                type="number"
-                                name="minPrice"
-                                placeholder="Min"
-                                value={filters.minPrice}
-                                onChange={handlePriceChange}
-                                className="price-field"
-                                min="0"
-                            />
-                            <span style={{ alignSelf: 'center', color: '#999' }}>-</span>
-                            <input
-                                type="number"
-                                name="maxPrice"
-                                placeholder="Max"
-                                value={filters.maxPrice}
-                                onChange={handlePriceChange}
-                                className="price-field"
-                                min="0"
-                            />
+                            <div className="price-field-wrapper">
+                                <span className="price-field-prefix">{region.symbol}</span>
+                                <input
+                                    type="number"
+                                    name="minPrice"
+                                    placeholder="Min"
+                                    value={filters.minPrice}
+                                    onChange={handlePriceChange}
+                                    className="price-field"
+                                    min="0"
+                                />
+                            </div>
+                            <span style={{ color: '#9ca3af', fontWeight: '500' }}>to</span>
+                            <div className="price-field-wrapper">
+                                <span className="price-field-prefix">{region.symbol}</span>
+                                <input
+                                    type="number"
+                                    name="maxPrice"
+                                    placeholder="Max"
+                                    value={filters.maxPrice}
+                                    onChange={handlePriceChange}
+                                    className="price-field"
+                                    min="0"
+                                />
+                            </div>
                         </div>
                         {/* Simple slider visual (non-functional/decorative for this iteration since standard <input range> logic is complex for dual handles without libs) */}
                         <div className="range-slider">
                             <div style={{
                                 position: 'absolute',
-                                left: '0%',
-                                right: '0%',
-                                height: '100%',
-                                background: '#ccc'
-                            }}></div>
-                            <div style={{
-                                position: 'absolute',
                                 left: `${Math.min(((filters.minPrice || 0) / 300) * 100, 100)}%`,
                                 right: `${100 - Math.min(((filters.maxPrice || 300) / 300) * 100, 100)}%`,
                                 height: '100%',
-                                background: '#051025'
+                                background: '#051025',
+                                borderRadius: '4px'
                             }}></div>
                         </div>
                     </div>

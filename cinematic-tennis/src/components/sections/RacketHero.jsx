@@ -6,8 +6,7 @@ const RacketHero = () => {
             backgroundColor: 'transparent',
             minHeight: '100vh',
             display: 'flex',
-            alignItems: 'center',
-            padding: '4rem 6vw',
+            padding: '4rem 13vw',
             position: 'relative'
         }}>
             {/* Content on the LEFT side — Racket 3D is on the RIGHT (managed by Experience.jsx) */}
@@ -53,47 +52,17 @@ const RacketHero = () => {
                 {/* Specs Grid */}
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
+                    gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
                     gap: '1.5rem',
                     marginBottom: '2rem'
                 }}>
-                    <div style={{
-                        borderTop: '2px solid #1a1a1a',
-                        paddingTop: '0.75rem'
-                    }}>
-                        <span style={{
-                            fontFamily: 'var(--font-serif)',
-                            fontSize: '2rem',
-                            color: '#1a1a1a',
-                            fontWeight: 700,
-                            display: 'block'
-                        }}>100</span>
-                        <span style={{
-                            fontFamily: 'var(--font-sans)',
-                            fontSize: '0.75rem',
-                            textTransform: 'uppercase',
-                            color: '#888',
-                            letterSpacing: '0.1em'
-                        }}>Sq. Inches</span>
+                    <div className="spec-card">
+                        <span className="spec-value">100</span>
+                        <span className="spec-label">Sq. Inches</span>
                     </div>
-                    <div style={{
-                        borderTop: '2px solid #1a1a1a',
-                        paddingTop: '0.75rem'
-                    }}>
-                        <span style={{
-                            fontFamily: 'var(--font-serif)',
-                            fontSize: '2rem',
-                            color: '#1a1a1a',
-                            fontWeight: 700,
-                            display: 'block'
-                        }}>+20%</span>
-                        <span style={{
-                            fontFamily: 'var(--font-sans)',
-                            fontSize: '0.75rem',
-                            textTransform: 'uppercase',
-                            color: '#888',
-                            letterSpacing: '0.1em'
-                        }}>Hitting Area</span>
+                    <div className="spec-card">
+                        <span className="spec-value">+20%</span>
+                        <span className="spec-label">Hitting Area</span>
                     </div>
                 </div>
             </div>

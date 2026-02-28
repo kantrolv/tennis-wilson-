@@ -17,40 +17,24 @@ const Performance = () => {
 
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '4rem',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '2rem',
                 width: '100%',
-                maxWidth: '1000px'
+                maxWidth: '1200px',
+                margin: '0 auto'
             }}>
                 {metrics.map((m) => (
-                    <div key={m.label} style={{ textAlign: 'center' }}>
-                        <div style={{
-                            height: '200px',
-                            width: '10px',
-                            background: 'rgba(0,0,0,0.08)',
-                            margin: '0 auto 1rem',
-                            position: 'relative',
-                            borderRadius: '5px',
-                            overflow: 'hidden'
-                        }}>
-                            <div style={{
-                                position: 'absolute',
-                                bottom: 0,
-                                left: 0,
-                                width: '100%',
-                                height: `${m.value}%`,
-                                backgroundColor: '#1a1a1a',
-                                transition: 'height 1s ease-out'
-                            }}></div>
+                    <div key={m.label} className="performance-card" style={{ textAlign: 'left' }}>
+                        <span className="perf-watermark">{m.value}</span>
+                        <div className="perf-content">
+                            <div className="perf-header">
+                                <span className="perf-label">{m.label}</span>
+                                <span className="perf-value">{m.value}<span className="perf-value-sub">/100</span></span>
+                            </div>
+                            <div className="perf-track">
+                                <div className="perf-fill" style={{ width: `${m.value}%` }}></div>
+                            </div>
                         </div>
-                        <h4 style={{
-                            fontFamily: 'var(--font-sans)',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.1em',
-                            fontSize: '0.9rem',
-                            color: '#1a1a1a'
-                        }}>{m.label}</h4>
-                        <span style={{ opacity: 0.5, fontSize: '0.8rem', color: '#555' }}>{m.value}/100</span>
                     </div>
                 ))}
             </div>

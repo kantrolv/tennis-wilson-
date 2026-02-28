@@ -6,8 +6,7 @@ const RacketStrings = () => {
             backgroundColor: 'transparent',
             minHeight: '100vh',
             display: 'flex',
-            alignItems: 'center',
-            padding: '4rem 6vw',
+            padding: '4rem 13vw',
             position: 'relative'
         }}>
             <div style={{ maxWidth: '550px', zIndex: 2 }}>
@@ -52,66 +51,21 @@ const RacketStrings = () => {
                 {/* String Specs */}
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: '1fr 1fr 1fr',
+                    gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)',
                     gap: '1.5rem',
                     marginBottom: '2rem'
                 }}>
-                    <div style={{
-                        borderTop: '2px solid #1a1a1a',
-                        paddingTop: '0.75rem'
-                    }}>
-                        <span style={{
-                            fontFamily: 'var(--font-serif)',
-                            fontSize: '1.8rem',
-                            color: '#1a1a1a',
-                            fontWeight: 700,
-                            display: 'block'
-                        }}>16×19</span>
-                        <span style={{
-                            fontFamily: 'var(--font-sans)',
-                            fontSize: '0.7rem',
-                            textTransform: 'uppercase',
-                            color: '#888',
-                            letterSpacing: '0.1em'
-                        }}>String Pattern</span>
+                    <div className="spec-card" style={{ padding: '1.25rem 1rem' }}>
+                        <span className="spec-value" style={{ fontSize: '1.8rem' }}>16×19</span>
+                        <span className="spec-label" style={{ fontSize: '0.65rem' }}>String Pattern</span>
                     </div>
-                    <div style={{
-                        borderTop: '2px solid #1a1a1a',
-                        paddingTop: '0.75rem'
-                    }}>
-                        <span style={{
-                            fontFamily: 'var(--font-serif)',
-                            fontSize: '1.8rem',
-                            color: '#1a1a1a',
-                            fontWeight: 700,
-                            display: 'block'
-                        }}>+15%</span>
-                        <span style={{
-                            fontFamily: 'var(--font-sans)',
-                            fontSize: '0.7rem',
-                            textTransform: 'uppercase',
-                            color: '#888',
-                            letterSpacing: '0.1em'
-                        }}>Sweet Spot</span>
+                    <div className="spec-card" style={{ padding: '1.25rem 1rem' }}>
+                        <span className="spec-value" style={{ fontSize: '1.8rem' }}>+15%</span>
+                        <span className="spec-label" style={{ fontSize: '0.65rem' }}>Sweet Spot</span>
                     </div>
-                    <div style={{
-                        borderTop: '2px solid #1a1a1a',
-                        paddingTop: '0.75rem'
-                    }}>
-                        <span style={{
-                            fontFamily: 'var(--font-serif)',
-                            fontSize: '1.8rem',
-                            color: '#1a1a1a',
-                            fontWeight: 700,
-                            display: 'block'
-                        }}>50-60</span>
-                        <span style={{
-                            fontFamily: 'var(--font-sans)',
-                            fontSize: '0.7rem',
-                            textTransform: 'uppercase',
-                            color: '#888',
-                            letterSpacing: '0.1em'
-                        }}>Tension (lbs)</span>
+                    <div className="spec-card" style={{ padding: '1.25rem 1rem' }}>
+                        <span className="spec-value" style={{ fontSize: '1.8rem' }}>50-60</span>
+                        <span className="spec-label" style={{ fontSize: '0.65rem' }}>Tension (lbs)</span>
                     </div>
                 </div>
 
