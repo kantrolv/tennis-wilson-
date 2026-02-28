@@ -17,10 +17,14 @@ const getRackets = asyncHandler(async (req, res) => {
     if (region) {
         query.$or = [
             { addedByRegion: 'global' },
-            { addedByRegion: region }
+            { addedByRegion: region },
+            { addedByRegion: { $exists: false } }
         ];
     } else {
-        query.addedByRegion = 'global';
+        query.$or = [
+            { addedByRegion: 'global' },
+            { addedByRegion: { $exists: false } }
+        ];
     }
 
     // Series Filter (Multiple selection support)

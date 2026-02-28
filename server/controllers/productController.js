@@ -22,11 +22,15 @@ const getProducts = asyncHandler(async (req, res) => {
         if (region !== 'all') {
             query.$or = [
                 { addedByRegion: 'global' },
-                { addedByRegion: region }
+                { addedByRegion: region },
+                { addedByRegion: { $exists: false } }
             ];
         }
     } else {
-        query.addedByRegion = 'global';
+        query.$or = [
+            { addedByRegion: 'global' },
+            { addedByRegion: { $exists: false } }
+        ];
     }
 
     if (ageGroup) {
