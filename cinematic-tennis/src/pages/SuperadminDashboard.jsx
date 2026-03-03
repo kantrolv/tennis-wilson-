@@ -35,9 +35,9 @@ const SuperadminDashboard = () => {
     const fetchAll = async () => {
         try {
             const [dashRes, analyticsRes, lowStockRes] = await Promise.all([
-                axios.get('http://localhost:5001/api/superadmin/dashboard', authHeader),
-                axios.get('http://localhost:5001/api/superadmin/analytics', authHeader),
-                axios.get('http://localhost:5001/api/superadmin/low-stock', authHeader),
+                axios.get('${import.meta.env.VITE_API_URL}/api/superadmin/dashboard', authHeader),
+                axios.get('${import.meta.env.VITE_API_URL}/api/superadmin/analytics', authHeader),
+                axios.get('${import.meta.env.VITE_API_URL}/api/superadmin/low-stock', authHeader),
             ]);
             setDashboard(dashRes.data);
             setAnalytics(analyticsRes.data.analytics);
@@ -56,7 +56,7 @@ const SuperadminDashboard = () => {
         setCreating(true);
         setActionMsg(null);
         try {
-            const { data } = await axios.post('http://localhost:5001/api/superadmin/create-admin', formData, authHeader);
+            const { data } = await axios.post('${import.meta.env.VITE_API_URL}/api/superadmin/create-admin', formData, authHeader);
             setActionMsg({ type: 'success', text: `✅ Admin created: ${data.email} (${data.region})` });
 
             // Set form to empty, region will be correctly set by the useEffect
@@ -86,7 +86,7 @@ const SuperadminDashboard = () => {
     const handleDeleteAdmin = async (id, email) => {
         if (!window.confirm(`Delete admin: ${email}?`)) return;
         try {
-            await axios.delete(`http://localhost:5001/api/superadmin/delete-admin/${id}`, authHeader);
+            await axios.delete(`${import.meta.env.VITE_API_URL}/api/superadmin/delete-admin/${id}`, authHeader);
             setActionMsg({ type: 'success', text: `✅ Admin '${email}' deleted` });
             fetchAll();
         } catch (err) {

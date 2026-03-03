@@ -97,13 +97,13 @@ export const CartProvider = ({ children }) => {
                         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
                     };
 
-                    const { data: dbCartItems } = await axios.get('http://localhost:5001/api/cart', config);
+                    const { data: dbCartItems } = await axios.get('${import.meta.env.VITE_API_URL}/api/cart', config);
 
                     if (dbCartItems.length === 0 && cart.length > 0) {
                         // DB is empty but local has items → push local to DB
                         const payload = buildSyncPayload(cart);
                         const { data: updatedCart } = await axios.post(
-                            'http://localhost:5001/api/cart/sync',
+                            '${import.meta.env.VITE_API_URL}/api/cart/sync',
                             { cartItems: payload },
                             config
                         );
@@ -169,7 +169,7 @@ export const CartProvider = ({ children }) => {
 
                     const payload = buildSyncPayload(cart);
                     console.log('[CartContext] Syncing to backend:', payload.length, 'items');
-                    await axios.post('http://localhost:5001/api/cart/sync', { cartItems: payload }, config);
+                    await axios.post('${import.meta.env.VITE_API_URL}/api/cart/sync', { cartItems: payload }, config);
                     console.log('[CartContext] Backend sync successful');
                 } catch (e) {
                     console.error("Failed to save cart to DB", e);

@@ -41,7 +41,7 @@ const Orders = () => {
                 };
 
                 // Use absolute URL to avoid proxy issues, with fallback for local dev
-                const backendUrl = 'http://localhost:5001';
+                const backendUrl = import.meta.env.VITE_API_URL;
                 const { data } = await axios.get(`${backendUrl}/api/orders/myorders`, config);
                 setOrders(data);
             } catch (error) {

@@ -130,7 +130,7 @@ const Payment = () => {
                 headers: { Authorization: `Bearer ${token}` }
             };
 
-            const backendUrl = 'http://localhost:5001';
+            const backendUrl = import.meta.env.VITE_API_URL;
 
             // Submit order to backend
             const orderPayload = {
