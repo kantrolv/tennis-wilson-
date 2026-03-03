@@ -12,7 +12,7 @@ import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import Login from './pages/Login';
 import Signup from './pages/Signup';
-import "./styles/Auth.css";
+import "./styles/auth.css";
 import Profile from './pages/Profile';
 import Checkout from './pages/Checkout';
 import Payment from './pages/Payment';
