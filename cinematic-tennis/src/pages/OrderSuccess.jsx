@@ -43,7 +43,7 @@ const OrderSuccess = () => {
                     }
                     if (!token) throw new Error("Not authenticated");
 
-                    const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/orders/${queryId}`, {
+                    const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/orders/${queryId}`, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
                     setFetchedOrder(data);

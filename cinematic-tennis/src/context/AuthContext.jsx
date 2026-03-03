@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
                             Authorization: `Bearer ${token}`
                         }
                     }
-                    const { data } = await axios.get('${import.meta.env.VITE_API_URL}/api/auth/me', config);
+                    const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/auth/me`, config);
                     setUser(data);
                     // Auto-sync region for admins on initial load
                     syncRegionFromUser(data);
@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }) => {
         setLoading(true);
         setError(null);
         try {
-            const { data } = await axios.post('${import.meta.env.VITE_API_URL}/api/auth/login', { email, password });
+            const { data } = await axios.post(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/auth/login`, { email, password });
             localStorage.setItem('token', data.token);
             setUser(data);
             // Auto-sync region for admins on login
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
         setLoading(true);
         setError(null);
         try {
-            const { data } = await axios.post('${import.meta.env.VITE_API_URL}/api/auth/signup', { name, email, password, region });
+            const { data } = await axios.post(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/auth/signup`, { name, email, password, region });
             localStorage.setItem('token', data.token);
             setUser(data);
             // Sync region for the newly created user
@@ -83,7 +83,7 @@ export const AuthProvider = ({ children }) => {
                     Authorization: `Bearer ${token}`
                 }
             };
-            const { data } = await axios.post('${import.meta.env.VITE_API_URL}/api/users/address', addressData, config);
+            const { data } = await axios.post(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/users/address`, addressData, config);
             setUser({ ...user, addresses: data });
             return data;
         } catch (err) {
@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }) => {
                     Authorization: `Bearer ${token}`
                 }
             };
-            const { data } = await axios.delete(`${import.meta.env.VITE_API_URL}/api/users/address/${id}`, config);
+            const { data } = await axios.delete(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/users/address/${id}`, config);
             setUser({ ...user, addresses: data });
             return data;
         } catch (err) {
@@ -117,7 +117,7 @@ export const AuthProvider = ({ children }) => {
                     Authorization: `Bearer ${token}`
                 }
             };
-            const { data } = await axios.put(`${import.meta.env.VITE_API_URL}/api/users/address/${id}`, addressData, config);
+            const { data } = await axios.put(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/users/address/${id}`, addressData, config);
             setUser({ ...user, addresses: data });
             return data;
         } catch (err) {

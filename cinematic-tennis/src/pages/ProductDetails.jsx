@@ -45,7 +45,7 @@ const ProductDetails = () => {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/rackets/${id}`);
+                const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/rackets/${id}`);
                 setProduct(data);
                 // Set defaults once product is loaded
                 if (data) {

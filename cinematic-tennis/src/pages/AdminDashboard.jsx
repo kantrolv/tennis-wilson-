@@ -45,10 +45,10 @@ const AdminDashboard = () => {
             const adminRegion = user?.role === 'superadmin' ? 'all' : (regionMap[user?.region] || 'usa');
 
             const [dashRes, lowStockRes, ordersRes, productsRes] = await Promise.all([
-                axios.get('${import.meta.env.VITE_API_URL}/api/admin/dashboard', authHeader),
-                axios.get('${import.meta.env.VITE_API_URL}/api/admin/low-stock', authHeader),
-                axios.get('${import.meta.env.VITE_API_URL}/api/admin/orders', authHeader),
-                axios.get(`${import.meta.env.VITE_API_URL}/api/products?region=${adminRegion}`),
+                axios.get(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/admin/dashboard`, authHeader),
+                axios.get(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/admin/low-stock`, authHeader),
+                axios.get(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/admin/orders`, authHeader),
+                axios.get(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/products?region=${adminRegion}`),
             ]);
             setDashboard(dashRes.data);
             setLowStock(lowStockRes.data);
@@ -68,7 +68,7 @@ const AdminDashboard = () => {
         if (!selectedProduct) return;
         setUpdatingStock(true);
         try {
-            await axios.put(`${import.meta.env.VITE_API_URL}/api/admin/update-stock/${selectedProduct}`, {
+            await axios.put(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/admin/update-stock/${selectedProduct}`, {
                 stock: newStockValue
             }, authHeader);
             setStatusMsg({ type: 'success', text: 'Stock updated successfully!' });
@@ -104,7 +104,7 @@ const AdminDashboard = () => {
             // Defaults for grip stock
             formData.gripStock = { "4 1/4\" (2)": 10, "4 3/8\" (3)": 10 };
 
-            await axios.post('${import.meta.env.VITE_API_URL}/api/admin/add-product', formData, authHeader);
+            await axios.post(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/admin/add-product`, formData, authHeader);
             setStatusMsg({ type: 'success', text: 'Racket added successfully!' });
             setNewRacket({
                 name: '', brand: 'Wilson', model: 'Pro Staff/RF', price: '',
@@ -388,7 +388,7 @@ const AdminDashboard = () => {
                                 </div>
                             ))}
                         </div>
-                    ) : <p style={styles.empty}>✅ All stock levels are optimal.</p>}
+                    ) : <p style={styles.empty}>All stock levels are optimal.</p>}
                 </section>
             )}
 

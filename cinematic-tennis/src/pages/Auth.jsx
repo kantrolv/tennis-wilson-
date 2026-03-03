@@ -47,7 +47,7 @@ const Auth = () => {
         try {
             // Assuming proxy is set up in vite.config or we use full URL
             // Using full URL for local dev if proxy isn't set, but try relative first
-            const { data } = await axios.post(`${import.meta.env.VITE_API_URL}${endpoint}`, payload);
+            const { data } = await axios.post(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}${endpoint}`, payload);
 
             // Store token
             localStorage.setItem('userInfo', JSON.stringify(data));

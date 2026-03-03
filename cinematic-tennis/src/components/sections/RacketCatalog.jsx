@@ -55,7 +55,7 @@ const RacketCatalog = ({ onCheckout }) => {
 
                 params.append('region', backendRegion);
 
-                const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/rackets?${params.toString()}`);
+                const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/rackets?${params.toString()}`);
                 setRackets(data);
                 setLoading(false);
             } catch (err) {
