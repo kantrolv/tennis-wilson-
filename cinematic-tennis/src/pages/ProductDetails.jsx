@@ -213,7 +213,9 @@ const ProductDetails = () => {
                                             : {
                                                 "4 1/8": product.stock ? (product.stock[regionKey] || 0) : 0,
                                                 "4 1/4": product.stock ? (product.stock[regionKey] || 0) : 0,
-                                                "4 3/8": product.stock ? (product.stock[regionKey] || 0) : 0
+                                                "4 3/8": product.stock ? (product.stock[regionKey] || 0) : 0,
+                                                "4 1/2": product.stock ? (product.stock[regionKey] || 0) : 0,
+                                                "4 5/8": product.stock ? (product.stock[regionKey] || 0) : 0
                                             };
 
                                         return (
