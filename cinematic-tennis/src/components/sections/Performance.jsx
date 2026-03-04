@@ -15,8 +15,9 @@ const Performance = () => {
                 Only the shot remains. Calibrated for the modern game.
             </p>
 
-            <div className="responsive-grid-2" style={{
+            <div style={{
                 display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
                 gap: '2rem',
                 width: '100%',
                 maxWidth: '1200px',

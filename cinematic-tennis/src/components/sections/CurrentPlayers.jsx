@@ -14,7 +14,7 @@ const CurrentPlayers = () => {
             minHeight: '80vh',
             padding: '4rem 6vw'
         }}>
-            <div className="current-players-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '4rem', width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '4rem', width: '100%' }}>
                 <div>
                     <h2 className="text-hero" style={{ fontSize: '3rem', margin: 0, color: '#1a1a1a' }}>The Modern Game.</h2>
                     <p className="text-sub" style={{ margin: '1rem 0 0 0', color: '#555' }}>The game evolves. Precision remains.</p>

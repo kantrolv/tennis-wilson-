@@ -129,18 +129,18 @@ const ProductDetails = () => {
                     <Link to="/rackets" style={{ textDecoration: 'none', color: '#000' }}>Rackets</Link> / {product.name}
                 </div>
 
-                <div className="product-details-grid" style={{
+                <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(min(400px, 100%), 1fr))',
-                    gap: '6rem',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', // Widened minmax slightly
+                    gap: '6rem', // Increased gap for airy feel
                     maxWidth: '1600px',
                     margin: '0 auto',
                     padding: '2rem 4vw'
                 }}>
 
                     {/* Left: Big Image */}
-                    <div ref={imageRef} className="product-image-panel" style={{
-                        backgroundColor: '#F0F0F0',
+                    <div ref={imageRef} style={{
+                        backgroundColor: '#F0F0F0', // Slightly darker grey for contrast
                         borderRadius: '0px',
                         display: 'flex',
                         alignItems: 'center',
@@ -406,7 +406,7 @@ const ProductDetails = () => {
                             The {product.model} series combines classic design with modern performance technologies. Engineered for tournament-level play, it offers superior control and feel.
                         </p>
 
-                        <div className="overview-specs-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '2rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '2rem' }}>
                             {/* Specs Table */}
                             <div>
                                 <h4 style={{ textTransform: 'uppercase', fontSize: '0.8rem', marginBottom: '1rem', letterSpacing: '0.1em', color: '#000' }}>Specs</h4>
