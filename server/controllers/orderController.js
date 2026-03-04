@@ -56,7 +56,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
             // If the product exists but gripStock for the requested size is entirely undefined, then fallback to just region stock
             if (!updatedProduct) {
                 const checkProd = await Product.findById(productId);
-                if (checkProd && (!checkProd.gripStock || !checkProd.gripStock.get(regionKey) || checkProd.gripStock.get(regionKey).get(gripSize) === undefined)) {
+                if (checkProd && (!checkProd.gripStock || !checkProd.gripStock[regionKey] || checkProd.gripStock[regionKey].get(gripSize) === undefined)) {
                     updatedProduct = await Product.findOneAndUpdate(
                         {
                             _id: productId,

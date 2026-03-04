@@ -225,18 +225,20 @@ const updateStock = asyncHandler(async (req, res) => {
     const oldStock = product.stock[targetRegion] || 0;
     const diff = newStock - oldStock;
 
-    if (diff > 0 && product.gripStock) {
+    if (diff !== 0 && product.gripStock) {
         if (!product.gripStock[targetRegion]) {
             product.gripStock[targetRegion] = new Map();
         }
         let regionGripMap = product.gripStock[targetRegion];
         if (regionGripMap.size > 0) {
             for (let [key, val] of regionGripMap.entries()) {
-                regionGripMap.set(key, val + diff);
+                regionGripMap.set(key, Math.max(0, val + diff));
             }
         } else {
-            regionGripMap.set("4 1/4\" (2)", diff);
-            regionGripMap.set("4 3/8\" (3)", diff);
+            if (diff > 0) {
+                regionGripMap.set("4 1/4\" (2)", diff);
+                regionGripMap.set("4 3/8\" (3)", diff);
+            }
         }
         product.markModified('gripStock');
     }

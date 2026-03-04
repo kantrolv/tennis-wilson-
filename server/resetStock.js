@@ -28,7 +28,7 @@ const GRIP_SIZES = [
     '4-1/2" (4)'
 ];
 const STOCK_PER_GRIP = 10;
-const TOTAL_STOCK_PER_REGION = GRIP_SIZES.length * STOCK_PER_GRIP; // 5 × 10 = 50
+const TOTAL_STOCK_PER_REGION = 10; // Changed from 50 to 10 as requested
 
 const resetStock = async () => {
     try {
@@ -38,23 +38,20 @@ const resetStock = async () => {
         console.log(`\nFound ${products.length} products. Resetting stock...\n`);
 
         for (const product of products) {
-            // Build gripStock map: 10 units per grip size
-            const gripStock = {};
+            const gripStockMap = {};
             for (const size of GRIP_SIZES) {
-                gripStock[size] = STOCK_PER_GRIP;
+                gripStockMap[size] = 10;
             }
 
-            // Set 50 stock for every region
-            const stock = {
-                india: TOTAL_STOCK_PER_REGION,
-                usa: TOTAL_STOCK_PER_REGION,
-                uk: TOTAL_STOCK_PER_REGION,
-                uae: TOTAL_STOCK_PER_REGION,
-                france: TOTAL_STOCK_PER_REGION,
-                germany: TOTAL_STOCK_PER_REGION,
-                japan: TOTAL_STOCK_PER_REGION,
-                australia: TOTAL_STOCK_PER_REGION,
-            };
+            const regions = ['india', 'usa', 'uk', 'uae', 'france', 'germany', 'japan', 'australia'];
+
+            const gripStock = {};
+            const stock = {};
+
+            for (const r of regions) {
+                stock[r] = 10;
+                gripStock[r] = { ...gripStockMap };
+            }
 
             product.gripStock = gripStock;
             product.stock = stock;

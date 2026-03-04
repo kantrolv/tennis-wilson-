@@ -167,6 +167,9 @@ const Payment = () => {
                 const delivery = getDeliveryEstimate(regionCode);
                 const selectedPaymentObj = paymentMethods.find(m => m.id === selectedMethod);
 
+                // Clear the cart before redirecting
+                clearCart();
+
                 navigate('/order-success', {
                     state: {
                         orderId,
