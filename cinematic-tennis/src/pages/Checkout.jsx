@@ -77,7 +77,7 @@ const Checkout = () => {
         setFormData({
             label: 'Home',
             fullName: user?.name || '',
-            phoneNumber: countryData?.phoneCode ? `${countryData.phoneCode} ` : '',
+            phoneNumber: '',
             addressLine1: '',
             addressLine2: '',
             city: '',
@@ -94,10 +94,15 @@ const Checkout = () => {
         e.stopPropagation();
         setEditingAddressId(address._id);
         const isCustomLabel = !['Home', 'Office'].includes(address.label);
+        const countryData = LOCATION_DATA.find(c => c.name === address.country);
+        let phoneNum = address.phoneNumber || '';
+        if (countryData?.phoneCode && phoneNum.startsWith(countryData.phoneCode)) {
+            phoneNum = phoneNum.replace(countryData.phoneCode, '').trim();
+        }
         setFormData({
             label: isCustomLabel ? 'Other' : address.label,
             fullName: address.fullName,
-            phoneNumber: address.phoneNumber,
+            phoneNumber: phoneNum,
             addressLine1: address.addressLine1,
             addressLine2: address.addressLine2 || '',
             city: address.city,
@@ -119,7 +124,7 @@ const Checkout = () => {
                 ...prev,
                 country: value,
                 state: '',
-                phoneNumber: newCountryData?.phoneCode ? `${newCountryData.phoneCode} ` : ''
+                phoneNumber: ''
             }));
         } else {
             setFormData(prev => ({
@@ -136,11 +141,7 @@ const Checkout = () => {
         const countryConfig = LOCATION_DATA.find(c => c.name === formData.country);
 
         if (countryConfig) {
-            let phoneInput = formData.phoneNumber;
-            if (countryConfig.phoneCode && phoneInput.startsWith(countryConfig.phoneCode)) {
-                phoneInput = phoneInput.replace(countryConfig.phoneCode, '');
-            }
-            const cleanPhone = phoneInput.replace(/\D/g, '');
+            const cleanPhone = formData.phoneNumber.replace(/\D/g, '');
 
             if (countryConfig.phoneLength && cleanPhone.length !== countryConfig.phoneLength) {
                 alert(`Invalid Phone Number. For ${formData.country}, please enter exactly ${countryConfig.phoneLength} digits.`);
@@ -167,8 +168,13 @@ const Checkout = () => {
         }
 
         try {
+            const fullPhone = countryConfig?.phoneCode
+                ? `${countryConfig.phoneCode} ${formData.phoneNumber.trim()}`
+                : formData.phoneNumber.trim();
+
             const addressToSave = {
                 ...formData,
+                phoneNumber: fullPhone,
                 label: formData.label === 'Other' ? customLabel : formData.label,
             };
 
@@ -293,15 +299,27 @@ const Checkout = () => {
                                     <div className="form-row">
                                         <div className="form-group">
                                             <label className="form-label">Phone Number</label>
-                                            <input
-                                                type="tel"
-                                                className="form-input"
-                                                name="phoneNumber"
-                                                placeholder="Enter phone number"
-                                                value={formData.phoneNumber}
-                                                onChange={handleFormChange}
-                                                required
-                                            />
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                {selectedCountryData?.phoneCode && (
+                                                    <div style={{
+                                                        padding: '0 12px', height: '44px', display: 'flex', alignItems: 'center',
+                                                        background: '#f5f5f5', border: '1px solid #ddd', borderRadius: '4px',
+                                                        fontWeight: '500', color: '#555', fontSize: '14px', flexShrink: 0
+                                                    }}>
+                                                        {selectedCountryData.phoneCode}
+                                                    </div>
+                                                )}
+                                                <input
+                                                    type="tel"
+                                                    className="form-input"
+                                                    name="phoneNumber"
+                                                    placeholder="Enter phone number"
+                                                    value={formData.phoneNumber}
+                                                    onChange={handleFormChange}
+                                                    required
+                                                    style={{ flex: 1, margin: 0 }}
+                                                />
+                                            </div>
                                         </div>
                                         <div className="form-group">
                                             <label className="form-label">Address Label</label>
