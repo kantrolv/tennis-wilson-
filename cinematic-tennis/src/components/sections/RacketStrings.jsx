@@ -49,9 +49,8 @@ const RacketStrings = () => {
                 </p>
 
                 {/* String Specs */}
-                <div style={{
+                <div className="responsive-grid-3" style={{
                     display: 'grid',
-                    gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)',
                     gap: '1.5rem',
                     marginBottom: '2rem'
                 }}>

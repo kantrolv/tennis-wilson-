@@ -50,9 +50,8 @@ const RacketHero = () => {
                 </p>
 
                 {/* Specs Grid */}
-                <div style={{
+                <div className="responsive-grid-2" style={{
                     display: 'grid',
-                    gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
                     gap: '1.5rem',
                     marginBottom: '2rem'
                 }}>
