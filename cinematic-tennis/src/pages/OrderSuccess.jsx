@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import { useCart } from '../context/CartContext';
 import { useRegion } from '../context/RegionContext';
 import Layout from '../components/layout/Layout';
@@ -43,9 +43,7 @@ const OrderSuccess = () => {
                     }
                     if (!token) throw new Error("Not authenticated");
 
-                    const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/orders/${queryId}`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
+                    const { data } = await api.get(`/api/orders/${queryId}`);
                     setFetchedOrder(data);
                     setTimeout(() => setShowContent(true), 100);
                 } catch (err) {

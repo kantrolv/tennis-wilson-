@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useAuth } from './AuthContext';
 import { useRegion } from './RegionContext';
 
@@ -101,16 +101,12 @@ export const CartProvider = ({ children }) => {
                         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
                     };
 
-                    const { data: dbCartItems } = await axios.get(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/cart`, config);
+                    const { data: dbCartItems } = await api.get('/api/cart');
 
                     if (dbCartItems.length === 0 && cart.length > 0) {
                         // DB is empty but local has items → push local to DB
                         const payload = buildSyncPayload(cart);
-                        const { data: updatedCart } = await axios.post(
-                            `${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/cart/sync`,
-                            { cartItems: payload },
-                            config
-                        );
+                        const { data: updatedCart } = await api.post('/api/cart/sync', { cartItems: payload });
 
                         const mapped = updatedCart.map(normalizeCartItem).filter(Boolean);
                         skipNextSync.current = true;   // prevent re-POST of same data
@@ -173,7 +169,7 @@ export const CartProvider = ({ children }) => {
 
                     const payload = buildSyncPayload(cart);
                     console.log('[CartContext] Syncing to backend:', payload.length, 'items');
-                    await axios.post(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/cart/sync`, { cartItems: payload }, config);
+                    await api.post('/api/cart/sync', { cartItems: payload });
                     console.log('[CartContext] Backend sync successful');
                 } catch (e) {
                     console.error("Failed to save cart to DB", e);

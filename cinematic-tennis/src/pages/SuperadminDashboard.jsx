@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
-import axios from 'axios';
+import api from '../utils/api';
 
 const CURRENCY_SYMBOLS = { INR: '₹', USD: '$', GBP: '£', AED: 'د.إ', EUR: '€', JPY: '¥', AUD: 'A$' };
 const REGION_COLORS = {
@@ -35,9 +35,9 @@ const SuperadminDashboard = () => {
     const fetchAll = async () => {
         try {
             const [dashRes, analyticsRes, lowStockRes] = await Promise.all([
-                axios.get(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/superadmin/dashboard`, authHeader),
-                axios.get(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/superadmin/analytics`, authHeader),
-                axios.get(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/superadmin/low-stock`, authHeader),
+                api.get('/api/superadmin/dashboard'),
+                api.get('/api/superadmin/analytics'),
+                api.get('/api/superadmin/low-stock'),
             ]);
             setDashboard(dashRes.data);
             setAnalytics(analyticsRes.data.analytics);
@@ -56,7 +56,7 @@ const SuperadminDashboard = () => {
         setCreating(true);
         setActionMsg(null);
         try {
-            const { data } = await axios.post(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/superadmin/create-admin`, formData, authHeader);
+            const { data } = await api.post('/api/superadmin/create-admin', formData);
             setActionMsg({ type: 'success', text: `Admin created: ${data.email} (${data.region})` });
 
             // Set form to empty, region will be correctly set by the useEffect
@@ -86,7 +86,7 @@ const SuperadminDashboard = () => {
     const handleDeleteAdmin = async (id, email) => {
         if (!window.confirm(`Delete admin: ${email}?`)) return;
         try {
-            await axios.delete(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/superadmin/delete-admin/${id}`, authHeader);
+            await api.delete(`/api/superadmin/delete-admin/${id}`);
             setActionMsg({ type: 'success', text: `Admin '${email}' deleted` });
             fetchAll();
         } catch (err) {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 import { useRegion } from '../../context/RegionContext';
 import { getRegionalPrice, REGION_MAP } from '../../utils/regionPricing';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
@@ -55,7 +55,7 @@ const RacketCatalog = ({ onCheckout }) => {
 
                 params.append('region', backendRegion);
 
-                const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/rackets?${params.toString()}`);
+                const { data } = await api.get(`/api/rackets?${params.toString()}`);
                 setRackets(data);
                 setLoading(false);
             } catch (err) {

@@ -5,6 +5,9 @@ const notFound = (req, res, next) => {
 };
 
 const errorHandler = (err, req, res, next) => {
+    // Explicitly log the error stack for Render dashboard logs
+    console.error(err.stack);
+
     const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
     res.status(statusCode);
     res.json({

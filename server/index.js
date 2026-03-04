@@ -14,8 +14,9 @@ const app = express();
 
 // Set allowed frontend origins
 const allowedOrigins = [
-  'http://localhost:5173',          // Local Vite dev server
-  process.env.FRONTEND_URL          // Replace with live Vercel URL in your .env
+    'http://localhost:5173',          // Local Vite dev server
+    process.env.FRONTEND_URL,         // Replace with live Vercel URL in your .env
+    'https://your-vercel-domain.vercel.app' // Vercel Example
 ];
 
 // Configure CORS for production

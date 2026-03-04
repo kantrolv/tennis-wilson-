@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
-import axios from 'axios';
+import api from '../utils/api';
 
 const CURRENCY_SYMBOLS = { INR: '₹', USD: '$', GBP: '£', AED: 'د.إ', EUR: '€', JPY: '¥', AUD: 'A$' };
 const REGION_LABELS = {
@@ -45,10 +45,10 @@ const AdminDashboard = () => {
             const adminRegion = user?.role === 'superadmin' ? 'all' : (regionMap[user?.region] || 'usa');
 
             const [dashRes, lowStockRes, ordersRes, productsRes] = await Promise.all([
-                axios.get(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/admin/dashboard`, authHeader),
-                axios.get(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/admin/low-stock`, authHeader),
-                axios.get(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/admin/orders`, authHeader),
-                axios.get(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/products?region=${adminRegion}`),
+                api.get('/api/admin/dashboard'),
+                api.get('/api/admin/low-stock'),
+                api.get('/api/admin/orders'),
+                api.get(`/api/products?region=${adminRegion}`),
             ]);
             setDashboard(dashRes.data);
             setLowStock(lowStockRes.data);
@@ -68,9 +68,13 @@ const AdminDashboard = () => {
         if (!selectedProduct) return;
         setUpdatingStock(true);
         try {
-            await axios.put(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/admin/update-stock/${selectedProduct}`, {
-                stock: newStockValue
-            }, authHeader);
+            const regionMap = { US: 'usa', IN: 'india', GB: 'uk', AE: 'uae', FR: 'france', DE: 'germany', JP: 'japan', AU: 'australia' };
+            const adminRegion = user?.role === 'superadmin' ? (regionMap[user?.region] || 'usa') : undefined;
+
+            await api.put(`/api/admin/update-stock/${selectedProduct}`, {
+                stock: newStockValue,
+                region: adminRegion
+            });
             setStatusMsg({ type: 'success', text: 'Stock updated successfully!' });
             fetchData();
             setTimeout(() => setStatusMsg({ type: '', text: '' }), 3000);
@@ -104,7 +108,7 @@ const AdminDashboard = () => {
             // Defaults for grip stock
             formData.gripStock = { "4 1/4\" (2)": 10, "4 3/8\" (3)": 10 };
 
-            await axios.post(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/admin/add-product`, formData, authHeader);
+            await api.post('/api/admin/add-product', formData);
             setStatusMsg({ type: 'success', text: 'Racket added successfully!' });
             setNewRacket({
                 name: '', brand: 'Wilson', model: 'Pro Staff/RF', price: '',

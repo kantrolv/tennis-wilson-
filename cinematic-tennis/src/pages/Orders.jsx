@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import Layout from '../components/layout/Layout';
 import { useRegion } from '../context/RegionContext';
 import '../styles/Orders.css';
@@ -34,15 +34,7 @@ const Orders = () => {
                     return;
                 }
 
-                const config = {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                };
-
-                // Use absolute URL to avoid proxy issues, with fallback for local dev
-                const backendUrl = import.meta.env.VITE_API_URL;
-                const { data } = await axios.get(`${backendUrl}/api/orders/myorders`, config);
+                const { data } = await api.get('/api/orders/myorders');
                 setOrders(data);
             } catch (error) {
                 console.error('Error fetching orders:', error);

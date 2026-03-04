@@ -10,7 +10,7 @@ import {
     generateOrderId,
     getDeliveryEstimate
 } from '../constants/paymentConfig';
-import axios from 'axios';
+import api from '../utils/api';
 import '../styles/Payment.css';
 
 const Payment = () => {
@@ -156,7 +156,7 @@ const Payment = () => {
                 }
             };
 
-            const { data } = await axios.post(`${backendUrl}/api/orders`, orderPayload, config);
+            const { data } = await api.post('/api/orders', orderPayload);
 
             setIsProcessing(false);
             setPaymentDone(true);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import { useRegion } from '../context/RegionContext';
 import { getRegionalPrice, formatAddonPrice } from '../utils/regionPricing';
 import { useCart } from '../context/CartContext'; // Import Cart Hook
@@ -45,7 +45,7 @@ const ProductDetails = () => {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'https://tennis-wilson.onrender.com'}/api/rackets/${id}`);
+                const { data } = await api.get(`/api/rackets/${id}`);
                 setProduct(data);
                 // Set defaults once product is loaded
                 if (data) {
