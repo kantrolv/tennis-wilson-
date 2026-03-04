@@ -207,18 +207,20 @@ const ProductDetails = () => {
                                             'US': 'usa', 'GB': 'uk', 'IN': 'india', 'AE': 'uae',
                                             'FR': 'france', 'DE': 'germany', 'JP': 'japan', 'AU': 'australia'
                                         };
-                                        const regionKey = regionMap[region] || 'usa';
-                                        const regionalGripStock = product.gripStock ? product.gripStock[regionKey] : null;
-
-                                        if (!regionalGripStock) return <div>No Grip Stock Data: {JSON.stringify(product.gripStock)} | Region: {regionKey}</div>;
-
-                                        const stringified = JSON.stringify(regionalGripStock);
+                                        const regionKey = regionMap[region?.countryCode] || 'usa';
+                                        const regionalGripStock = (product.gripStock && product.gripStock[regionKey] && Object.keys(product.gripStock[regionKey]).length > 0)
+                                            ? product.gripStock[regionKey]
+                                            : {
+                                                "4 1/8": product.stock ? (product.stock[regionKey] || 0) : 0,
+                                                "4 1/4": product.stock ? (product.stock[regionKey] || 0) : 0,
+                                                "4 3/8": product.stock ? (product.stock[regionKey] || 0) : 0
+                                            };
 
                                         return (
                                             <>
-                                                <div style={{ width: '100%', fontSize: '10px', wordBreak: 'break-all' }}>DEBUG: {stringified}</div>
                                                 {Object.entries(regionalGripStock).map(([size, gripQty]) => {
-                                                    const regionStock = product.stock ? product.stock[regionKey] : 0;
+                                                    const regionStock = product.stock ? (product.stock[regionKey] || 0) : 0;
+                                                    // Use the grip option quantity directly, capped by overall region stock if needed
                                                     const effectiveStock = Math.min(gripQty, regionStock);
 
                                                     return (

@@ -201,10 +201,11 @@ export const CartProvider = ({ children }) => {
                 'US': 'usa', 'GB': 'uk', 'IN': 'india', 'AE': 'uae',
                 'FR': 'france', 'DE': 'germany', 'JP': 'japan', 'AU': 'australia'
             };
-            const regionKey = regionMap[region] || 'usa';
-            const rStock = product.stock ? product.stock[regionKey] : 99;
-            const gStock = (product.gripStock && product.gripStock[regionKey]) ? product.gripStock[regionKey][options.gripSize] : 99;
-            const maxStock = Math.min(rStock, gStock) || 99;
+            const regionKey = regionMap[region?.countryCode] || 'usa';
+            const rStock = product.stock && typeof product.stock[regionKey] === 'number' ? product.stock[regionKey] : 99;
+            const gStockVal = product.gripStock && product.gripStock[regionKey] ? product.gripStock[regionKey][options.gripSize] : undefined;
+            const gStock = typeof gStockVal === 'number' ? gStockVal : rStock;
+            const maxStock = Math.min(rStock, gStock);
 
             const existingItemIndex = prevCart.findIndex(item => item.cartId === cartId);
 

@@ -37,9 +37,8 @@ const addOrderItems = asyncHandler(async (req, res) => {
         for (const item of orderItems) {
             const { product: productId, gripSize, qty } = item;
 
-            // Atomic Update: Decrement stock ONLY if > 0
-            // Syntax for Map/Object nested key: "gripStock.4-1/2"
-            const updatedProduct = await Product.findOneAndUpdate(
+            // First attempt to deduct both gripStock and region stock
+            let updatedProduct = await Product.findOneAndUpdate(
                 {
                     _id: productId,
                     [`gripStock.${regionKey}.${gripSize}`]: { $gte: qty }, // Ensure enough grip stock
@@ -53,6 +52,25 @@ const addOrderItems = asyncHandler(async (req, res) => {
                 },
                 { new: true }
             );
+
+            // If the product exists but gripStock for the requested size is entirely undefined, then fallback to just region stock
+            if (!updatedProduct) {
+                const checkProd = await Product.findById(productId);
+                if (checkProd && (!checkProd.gripStock || !checkProd.gripStock.get(regionKey) || checkProd.gripStock.get(regionKey).get(gripSize) === undefined)) {
+                    updatedProduct = await Product.findOneAndUpdate(
+                        {
+                            _id: productId,
+                            [`stock.${regionKey}`]: { $gte: qty }
+                        },
+                        {
+                            $inc: {
+                                [`stock.${regionKey}`]: -qty
+                            }
+                        },
+                        { new: true }
+                    );
+                }
+            }
 
             if (!updatedProduct) {
                 res.status(400);
