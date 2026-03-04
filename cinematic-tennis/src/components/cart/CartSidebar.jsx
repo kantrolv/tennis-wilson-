@@ -202,7 +202,8 @@ const CartSidebar = () => {
                                             <span style={{ fontSize: '0.85rem', padding: '0 8px', fontWeight: 500 }}>{item.quantity}</span>
                                             <button
                                                 onClick={() => updateQuantity(item.cartId, item.quantity + 1)}
-                                                style={{ width: '28px', height: '28px', border: 'none', background: 'none', cursor: 'pointer', color: '#666', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                disabled={item.quantity >= (item.maxStock || 99)}
+                                                style={{ width: '28px', height: '28px', border: 'none', background: 'none', cursor: item.quantity >= (item.maxStock || 99) ? 'not-allowed' : 'pointer', color: item.quantity >= (item.maxStock || 99) ? '#ccc' : '#666', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                             >
                                                 +
                                             </button>

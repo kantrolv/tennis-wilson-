@@ -168,12 +168,23 @@ const addProduct = asyncHandler(async (req, res) => {
         addedByRegion = req.body.region;
     }
 
+    let globalGripStock = gripStock;
+    if (!globalGripStock || Object.keys(globalGripStock).length === 0) {
+        globalGripStock = { "4 1/4\" (2)": 10, "4 3/8\" (3)": 10 };
+    }
+    let regionalGripStock = {};
+    for (const region of VALID_REGIONS) {
+        regionalGripStock[region] = globalGripStock;
+    }
+
     const product = await Product.create({
         name, brand, model,
         price: price || regionalPricing.usa.price, // Keep base price for backward compat
         pricing: regionalPricing,
         category, ageGroup, sport,
-        weight, balance, material, gripStock, description, imageUrl,
+        weight, balance, material,
+        gripStock: regionalGripStock,
+        description, imageUrl,
         stock: regionalStock,
         addedByRegion,
     });
@@ -209,6 +220,25 @@ const updateStock = asyncHandler(async (req, res) => {
             res.status(400);
             throw new Error(`Superadmin must specify a valid region: ${VALID_REGIONS.join(', ')}`);
         }
+    }
+
+    const oldStock = product.stock[targetRegion] || 0;
+    const diff = newStock - oldStock;
+
+    if (diff > 0 && product.gripStock) {
+        if (!product.gripStock[targetRegion]) {
+            product.gripStock[targetRegion] = new Map();
+        }
+        let regionGripMap = product.gripStock[targetRegion];
+        if (regionGripMap.size > 0) {
+            for (let [key, val] of regionGripMap.entries()) {
+                regionGripMap.set(key, val + diff);
+            }
+        } else {
+            regionGripMap.set("4 1/4\" (2)", diff);
+            regionGripMap.set("4 3/8\" (3)", diff);
+        }
+        product.markModified('gripStock');
     }
 
     product.stock[targetRegion] = newStock;

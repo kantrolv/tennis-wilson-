@@ -17,6 +17,7 @@ const cartSchema = mongoose.Schema({
             imageUrl: { type: String },
             price: { type: Number, required: true },
             qty: { type: Number, required: true },
+            maxStock: { type: Number, default: 99 },
             gripSize: { type: String, default: 'N/A' },
             string: {
                 id: { type: String },

@@ -202,43 +202,58 @@ const ProductDetails = () => {
                             <div>
                                 <h3 style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1rem', color: '#000', fontWeight: 700 }}>1. Select Grip Size</h3>
                                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.8rem' }}>
-                                    {product.gripStock && Object.entries(product.gripStock).map(([size, gripQty]) => {
-                                        // Map user region to product stock key
-                                        const regionMap = { 'US': 'usa', 'GB': 'uk', 'IN': 'india', 'AE': 'uae' };
+                                    {(() => {
+                                        const regionMap = {
+                                            'US': 'usa', 'GB': 'uk', 'IN': 'india', 'AE': 'uae',
+                                            'FR': 'france', 'DE': 'germany', 'JP': 'japan', 'AU': 'australia'
+                                        };
                                         const regionKey = regionMap[region] || 'usa';
-                                        const regionStock = product.stock ? product.stock[regionKey] : 0;
+                                        const regionalGripStock = product.gripStock ? product.gripStock[regionKey] : null;
 
-                                        const effectiveStock = Math.min(gripQty, regionStock);
+                                        if (!regionalGripStock) return <div>No Grip Stock Data: {JSON.stringify(product.gripStock)} | Region: {regionKey}</div>;
+
+                                        const stringified = JSON.stringify(regionalGripStock);
 
                                         return (
-                                            <button
-                                                key={size}
-                                                disabled={effectiveStock <= 0}
-                                                onClick={() => setSelectedGrip({ size, stock: effectiveStock })}
-                                                style={{
-                                                    padding: '1rem 0',
-                                                    width: '100px', // Fixed width for uniform look
-                                                    border: selectedGrip?.size === size ? '2px solid #000' : '1px solid #000',
-                                                    background: selectedGrip?.size === size ? '#000' : 'transparent',
-                                                    color: selectedGrip?.size === size ? '#fff' : (effectiveStock <= 0 ? '#ccc' : '#000'),
-                                                    borderRadius: '0px',
-                                                    cursor: effectiveStock <= 0 ? 'not-allowed' : 'pointer',
-                                                    transition: 'all 0.2s',
-                                                    fontWeight: 500,
-                                                    fontSize: '0.9rem',
-                                                    textAlign: 'center'
-                                                }}
-                                            >
-                                                {size}
-                                            </button>
+                                            <>
+                                                <div style={{ width: '100%', fontSize: '10px', wordBreak: 'break-all' }}>DEBUG: {stringified}</div>
+                                                {Object.entries(regionalGripStock).map(([size, gripQty]) => {
+                                                    const regionStock = product.stock ? product.stock[regionKey] : 0;
+                                                    const effectiveStock = Math.min(gripQty, regionStock);
+
+                                                    return (
+                                                        <button
+                                                            key={size}
+                                                            disabled={effectiveStock <= 0}
+                                                            onClick={() => setSelectedGrip({ size, stock: effectiveStock })}
+                                                            style={{
+                                                                padding: '1rem 0',
+                                                                width: '100px', // Fixed width for uniform look
+                                                                border: selectedGrip?.size === size ? '2px solid #000' : '1px solid #000',
+                                                                background: selectedGrip?.size === size ? '#000' : 'transparent',
+                                                                color: selectedGrip?.size === size ? '#fff' : (effectiveStock <= 0 ? '#ccc' : '#000'),
+                                                                borderRadius: '0px',
+                                                                cursor: effectiveStock <= 0 ? 'not-allowed' : 'pointer',
+                                                                transition: 'all 0.2s',
+                                                                fontWeight: 500,
+                                                                fontSize: '0.9rem',
+                                                                textAlign: 'center'
+                                                            }}
+                                                        >
+                                                            {size}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </>
                                         );
-                                    })}
+                                    })()}
                                 </div>
                                 {selectedGrip && (
                                     <div style={{ marginTop: '0.8rem', fontSize: '0.8rem', color: selectedGrip.stock < 3 ? '#e53e3e' : '#2f855a', fontWeight: 500 }}>
                                         {selectedGrip.stock > 0 ? `In Stock (${selectedGrip.stock} available in your region)` : 'Out of Stock'}
                                     </div>
-                                )}
+                                )
+                                }
                             </div>
 
                             {/* 2. String Selection */}

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext';
+import { useRegion } from './RegionContext';
 
 const CartContext = createContext();
 
@@ -26,6 +27,7 @@ const normalizeCartItem = (item) => {
         price: item.price ?? 0,
         quantity,                                   // frontend canonical field
         qty: quantity,                              // keep in sync for safety
+        maxStock: item.maxStock || 99,
         cartId: item.cartId || `${item.product || item._id}-default`,
         imageUrl: item.imageUrl || item.image || '',
         gripSize: item.gripSize || item.selectedGrip || 'N/A',
@@ -49,6 +51,7 @@ const buildSyncPayload = (cartItems) => {
             imageUrl: n.imageUrl,
             price: n.price,
             qty: n.quantity,          // backend schema field
+            maxStock: n.maxStock,
             gripSize: n.gripSize,
             string: n.string || undefined,
             cover: n.cover || undefined,
@@ -59,6 +62,7 @@ const buildSyncPayload = (cartItems) => {
 
 export const CartProvider = ({ children }) => {
     const { user, loading } = useAuth();
+    const { region } = useRegion();
     const prevUser = useRef(user);
 
     // Helper to get local cart (safe parse)
@@ -193,13 +197,24 @@ export const CartProvider = ({ children }) => {
             const coverPrice = options.cover ? options.cover.price : 0;
             const itemPrice = basePrice + stringPrice + coverPrice;
 
+            const regionMap = {
+                'US': 'usa', 'GB': 'uk', 'IN': 'india', 'AE': 'uae',
+                'FR': 'france', 'DE': 'germany', 'JP': 'japan', 'AU': 'australia'
+            };
+            const regionKey = regionMap[region] || 'usa';
+            const rStock = product.stock ? product.stock[regionKey] : 99;
+            const gStock = (product.gripStock && product.gripStock[regionKey]) ? product.gripStock[regionKey][options.gripSize] : 99;
+            const maxStock = Math.min(rStock, gStock) || 99;
+
             const existingItemIndex = prevCart.findIndex(item => item.cartId === cartId);
 
             if (existingItemIndex > -1) {
                 const newCart = [...prevCart];
+                const newQty = newCart[existingItemIndex].quantity + quantity;
                 newCart[existingItemIndex] = {
                     ...newCart[existingItemIndex],
-                    quantity: newCart[existingItemIndex].quantity + quantity,
+                    quantity: newQty > maxStock ? maxStock : newQty,
+                    maxStock
                 };
                 return newCart;
             } else {
@@ -215,13 +230,14 @@ export const CartProvider = ({ children }) => {
                     cover: options.cover,
                     price: itemPrice,
                     basePrice: product.price,
-                    quantity,
+                    quantity: quantity > maxStock ? maxStock : quantity,
+                    maxStock
                 });
                 return [...prevCart, newItem];
             }
         });
         setIsCartOpen(true);
-    }, []);
+    }, [region]);
 
     const removeFromCart = useCallback((cartId) => {
         setCart(prevCart => prevCart.filter(item => item.cartId !== cartId));
@@ -229,11 +245,13 @@ export const CartProvider = ({ children }) => {
 
     const updateQuantity = useCallback((cartId, newQty) => {
         if (newQty < 1) return;
-        setCart(prevCart => prevCart.map(item =>
-            item.cartId === cartId
-                ? { ...item, quantity: newQty }
-                : item
-        ));
+        setCart(prevCart => prevCart.map(item => {
+            if (item.cartId === cartId) {
+                const max = item.maxStock || 99;
+                return { ...item, quantity: newQty > max ? max : newQty };
+            }
+            return item;
+        }));
     }, []);
 
     const clearCart = useCallback(() => {

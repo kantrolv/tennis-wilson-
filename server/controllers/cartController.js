@@ -68,6 +68,7 @@ const syncCart = asyncHandler(async (req, res) => {
                 imageUrl: item.imageUrl || '',
                 price: Number(item.price),
                 qty,
+                maxStock: item.maxStock || 99,
                 gripSize: item.gripSize || 'N/A',
                 string: item.string || undefined,
                 cover: item.cover || undefined,

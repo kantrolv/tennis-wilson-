@@ -65,9 +65,14 @@ const productSchema = mongoose.Schema({
         required: true
     },
     gripStock: {
-        type: Map,
-        of: Number,
-        default: {}
+        india: { type: Map, of: Number, default: {} },
+        usa: { type: Map, of: Number, default: {} },
+        uk: { type: Map, of: Number, default: {} },
+        uae: { type: Map, of: Number, default: {} },
+        france: { type: Map, of: Number, default: {} },
+        germany: { type: Map, of: Number, default: {} },
+        japan: { type: Map, of: Number, default: {} },
+        australia: { type: Map, of: Number, default: {} },
     },
     description: {
         type: String,

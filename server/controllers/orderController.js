@@ -42,12 +42,12 @@ const addOrderItems = asyncHandler(async (req, res) => {
             const updatedProduct = await Product.findOneAndUpdate(
                 {
                     _id: productId,
-                    [`gripStock.${gripSize}`]: { $gte: qty }, // Ensure enough grip stock
+                    [`gripStock.${regionKey}.${gripSize}`]: { $gte: qty }, // Ensure enough grip stock
                     [`stock.${regionKey}`]: { $gte: qty }     // Ensure enough region stock
                 },
                 {
                     $inc: {
-                        [`gripStock.${gripSize}`]: -qty,    // Deduct grip stock
+                        [`gripStock.${regionKey}.${gripSize}`]: -qty,    // Deduct grip stock
                         [`stock.${regionKey}`]: -qty        // Deduct region stock
                     }
                 },
