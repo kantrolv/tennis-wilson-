@@ -1,6 +1,8 @@
 import axios from 'axios';
 
 // Get API URL from Environment Variables (Production) OR default to localhost (Development)
+// In production on Vercel, VITE_API_URL is empty → relative same-origin calls (routed by vercel.json)
+// In local dev, VITE_API_URL=http://localhost:5001 → direct local server
 const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 const api = axios.create({

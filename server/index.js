@@ -12,24 +12,9 @@ connectDB();
 
 const app = express();
 
-// Set allowed frontend origins
-const allowedOrigins = [
-    'http://localhost:5173',          // Local Vite dev server
-    process.env.FRONTEND_URL,         // Replace with live Vercel URL in your .env
-    'https://your-vercel-domain.vercel.app' // Vercel Example
-];
-
-// Configure CORS for production
+// Configure CORS dynamically to fix deployment blockages
 const corsOptions = {
-    origin: function (origin, callback) {
-        // allowing 'undefined' origins (e.g. from postman or curl) requires more care in actual production
-        // here we check if origin is in our allowed array or if it doesn't exist (helpful during dev)
-        if (!origin || allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
+    origin: true, // Dynamically echoes the requesting origin, allowing ANY Vercel branch/URL
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true, // Allow cookies/headers if you use them
     optionsSuccessStatus: 204
@@ -72,6 +57,11 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5001;
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-});
+// Only start the HTTP server when run directly (not when imported by Vercel serverless)
+if (require.main === module) {
+    app.listen(PORT, '0.0.0.0', () => {
+        console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+    });
+}
+
+module.exports = app;
