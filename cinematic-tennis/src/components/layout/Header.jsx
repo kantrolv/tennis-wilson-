@@ -40,7 +40,7 @@ const Header = () => {
       color: 'var(--c-ivory)'
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
-        <Link to="/" className="logo" style={{
+        <a href="/" className="logo" style={{
           textDecoration: 'none',
           color: 'inherit',
           fontFamily: 'var(--font-serif)',
@@ -49,10 +49,10 @@ const Header = () => {
           letterSpacing: '0.1em'
         }}>
           WILSON
-        </Link>
+        </a>
 
         <nav style={{ display: 'flex', gap: '2rem' }}>
-          <Link to="/" style={{
+          <a href="/" style={{
             textDecoration: 'none',
             color: 'inherit',
             fontFamily: 'var(--font-sans)',
@@ -61,7 +61,7 @@ const Header = () => {
             letterSpacing: '0.05em'
           }}>
             Home
-          </Link>
+          </a>
           <a href="/rackets" onClick={handleRacketsClick} style={{
             textDecoration: 'none',
             color: 'inherit',
