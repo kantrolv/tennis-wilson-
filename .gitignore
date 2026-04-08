@@ -16,3 +16,4 @@ logs
 # Build
 dist/
 build/
+PROJECT_DOCUMENTATION.md
