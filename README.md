@@ -148,3 +148,163 @@
 │  │ Users   │ │ Products │ │ Orders │ │  Carts  │ │Admins │ │
 │  └─────────┘ └──────────┘ └────────┘ └─────────┘ └───────┘ │
 └──────────────────────────────────────────────────────────────┘
+```
+
+### Request Flow
+
+```
+React Component
+  → utils/api.js (Axios + JWT interceptor)
+    → Express Server (CORS → JSON parse → Route matching)
+      → Middleware (Auth → RBAC)
+        → Controller (Business logic)
+          → Mongoose Model → MongoDB
+            ← Response JSON
+```
+
+---
+
+## 🛠 Tech Stack
+
+### Frontend
+
+| Technology | Version | Purpose |
+|-----------|---------|---------|
+| **React** | 19.2 | UI library (SPA framework) |
+| **Vite** (Rolldown) | 7.2.5 | Build tool & dev server |
+| **Three.js** | 0.182 | 3D WebGL rendering |
+| **React Three Fiber** | 9.5 | React renderer for Three.js |
+| **Drei** | 10.7 | Useful R3F helpers & abstractions |
+| **GSAP** | 3.14 | Professional-grade animation engine |
+| **Lenis** | 1.3 | Buttery smooth scroll library |
+| **React Router** | 7.13 | Client-side routing |
+| **Axios** | 1.13 | HTTP client with interceptors |
+| **Leva** | 0.10 | GUI controls for 3D development |
+
+### Backend
+
+| Technology | Version | Purpose |
+|-----------|---------|---------|
+| **Express.js** | 5.2 | REST API framework |
+| **Mongoose** | 9.1 | MongoDB ODM |
+| **JWT** | 9.0 | Token-based authentication |
+| **bcryptjs** | 3.0 | Password hashing |
+| **Morgan** | 1.10 | HTTP request logger |
+| **CORS** | 2.8 | Cross-origin resource sharing |
+| **dotenv** | 17.2 | Environment variable management |
+
+### Data Pipeline
+
+| Technology | Purpose |
+|-----------|---------|
+| **Puppeteer** | Headless Chrome for scraping wilson.com |
+| **Cheerio** | HTML parsing & data extraction |
+
+### Infrastructure
+
+| Service | Purpose |
+|---------|---------|
+| **Vercel** | Frontend hosting + serverless API proxy |
+| **Render** | Backend hosting (Node.js web service) |
+| **MongoDB Atlas** | Cloud database |
+
+---
+
+## 📁 Project Structure
+
+```
+tennis-wilson-/
+│
+├── cinematic-tennis/                 # 🎨 FRONTEND (React + Vite)
+│   ├── api/                          # Vercel serverless proxy
+│   │   └── index.js                  # Imports Express app for serverless
+│   ├── public/                       # Static assets
+│   │   ├── racket.glb                # 3D racket model (1.7 MB)
+│   │   ├── tennis_ball.glb           # 3D tennis ball model (65 MB)
+│   │   └── tennis-ball.png           # Favicon
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Experience.jsx        # 🧠 3D animation brain (4-phase choreography)
+│   │   │   ├── Racket.jsx            # 3D racket model loader (forwardRef)
+│   │   │   ├── TennisBall.jsx        # 3D ball model loader (forwardRef)
+│   │   │   ├── HTMLOverlay.jsx       # Scroll text prompts over 3D canvas
+│   │   │   ├── Loader.jsx            # 3D asset loading screen
+│   │   │   ├── ProtectedRoute.jsx    # Auth guard (login required)
+│   │   │   ├── RoleProtectedRoute.jsx# RBAC guard (role verification)
+│   │   │   ├── cart/
+│   │   │   │   └── CartSidebar.jsx   # Slide-in cart panel
+│   │   │   ├── layout/
+│   │   │   │   ├── Layout.jsx        # Page wrapper (Header + Footer + Cart)
+│   │   │   │   ├── Header.jsx        # Navigation bar (mix-blend-mode: difference)
+│   │   │   │   └── Footer.jsx        # Adaptive footer
+│   │   │   ├── sections/             # Homepage content sections
+│   │   │   │   ├── RacketHero.jsx    # "Designed for Precision" hero
+│   │   │   │   ├── RacketStrings.jsx # String technology breakdown
+│   │   │   │   ├── FrameMaterial.jsx # Frame material showcase
+│   │   │   │   ├── Performance.jsx   # Performance metrics
+│   │   │   │   ├── LegacyPlayers.jsx # Tennis legends (Federer, Serena)
+│   │   │   │   ├── CurrentPlayers.jsx# Current pro players
+│   │   │   │   ├── RacketCatalog.jsx # Shop catalog with filters (23KB)
+│   │   │   │   └── CheckoutDemo.jsx  # Checkout simulation section
+│   │   │   └── ui/                   # Generic UI atoms
+│   │   ├── context/                  # 🧠 Global state management
+│   │   │   ├── RegionContext.jsx     # Country/currency/pricing state
+│   │   │   ├── AuthContext.jsx       # User authentication state
+│   │   │   └── CartContext.jsx       # Shopping cart state (dual-storage)
+│   │   ├── constants/                # Configuration data
+│   │   ├── data/                     # Static product data (fallback)
+│   │   ├── hooks/
+│   │   │   └── useScroll.js          # GSAP ScrollTrigger progress tracker
+│   │   ├── pages/                    # Route-level page components
+│   │   │   ├── Home.jsx              # Cinematic homepage orchestrator
+│   │   │   ├── Rackets.jsx           # Shop page wrapper
+│   │   │   ├── ProductDetails.jsx    # Product detail page (25KB)
+│   │   │   ├── Login.jsx             # Login form
+│   │   │   ├── Signup.jsx            # Registration form + region selection
+│   │   │   ├── Auth.jsx              # Combined auth page
+│   │   │   ├── Profile.jsx           # User profile & addresses
+│   │   │   ├── Checkout.jsx          # Multi-step checkout (34KB)
+│   │   │   ├── Payment.jsx           # Payment simulation (35KB)
+│   │   │   ├── OrderSuccess.jsx      # Order confirmation
+│   │   │   ├── Orders.jsx            # Order history
+│   │   │   ├── AdminDashboard.jsx    # Admin panel (31KB)
+│   │   │   └── SuperadminDashboard.jsx # Superadmin panel (25KB)
+│   │   ├── styles/                   # Feature-specific CSS
+│   │   ├── theme/
+│   │   │   └── variables.css         # CSS design tokens & variables
+│   │   ├── utils/
+│   │   │   ├── api.js                # Axios instance + interceptors
+│   │   │   ├── regionPricing.js      # Price conversion engine
+│   │   │   └── physics.js            # Frame-rate-independent damping
+│   │   ├── App.jsx                   # Root component (providers + routing)
+│   │   ├── main.jsx                  # Entry point (React 19 createRoot)
+│   │   ├── index.css                 # Global base styles
+│   │   └── App.css                   # App-level styles
+│   ├── index.html                    # SPA shell
+│   ├── package.json                  # Frontend dependencies
+│   ├── vite.config.js                # Vite build configuration
+│   └── vercel.json                   # Frontend-specific Vercel rewrites
+│
+├── server/                           # 🖥️ BACKEND (Express.js)
+│   ├── config/
+│   │   └── db.js                     # MongoDB connection (Mongoose)
+│   ├── controllers/                  # Business logic
+│   │   ├── authController.js         # Login, signup, getMe
+│   │   ├── rackets.controller.js     # Product queries with filtering
+│   │   ├── cartController.js         # Cart CRUD + sync
+│   │   ├── orderController.js        # Order creation & retrieval
+│   │   ├── productController.js      # Generic product CRUD
+│   │   ├── userController.js         # Address management
+│   │   ├── adminController.js        # Admin dashboard logic (20KB)
+│   │   └── superadminController.js   # Superadmin operations (11KB)
+│   ├── middleware/
+│   │   ├── authMiddleware.js         # JWT verification (dual-collection lookup)
+│   │   ├── authorize.js              # Role-based access control
+│   │   └── errorMiddleware.js        # 404 handler + global error handler
+│   ├── models/                       # Mongoose schemas
+│   │   ├── User.js                   # User schema (bcrypt pre-save hook)
+│   │   ├── Admin.js                  # Admin schema (security isolation)
+│   │   ├── Product.js                # Product schema (8-region pricing/stock)
+│   │   ├── Cart.js                   # Cart schema (per-user, composite keys)
+│   │   └── Order.js                  # Order schema (demo mode)
+│   ├── routes/                       # API route definitions
