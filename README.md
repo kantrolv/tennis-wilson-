@@ -308,3 +308,193 @@ tennis-wilson-/
 │   │   ├── Cart.js                   # Cart schema (per-user, composite keys)
 │   │   └── Order.js                  # Order schema (demo mode)
 │   ├── routes/                       # API route definitions
+│   │   ├── authRoutes.js             # POST /signup, /login, GET /me
+│   │   ├── rackets.routes.js         # GET /rackets, /rackets/:id
+│   │   ├── cartRoutes.js             # GET/POST/DELETE cart operations
+│   │   ├── orderRoutes.js            # POST /orders, GET /myorders
+│   │   ├── productRoutes.js          # Generic product endpoints
+│   │   ├── userRoutes.js             # Address CRUD
+│   │   ├── admin.js                  # Admin-only endpoints
+│   │   └── superadmin.js             # Superadmin-only endpoints
+│   ├── utils/
+│   │   └── generateToken.js          # JWT token generation helper
+│   ├── data/                         # Seed data (scraped JSON)
+│   ├── index.js                      # Server entry (standalone + serverless)
+│   ├── seeder.js                     # Database seeder script
+│   ├── seedSuperadmin.js             # Initial superadmin creation
+│   ├── migrateAdmins.js              # Admin data migration
+│   └── package.json                  # Backend dependencies
+│
+├── scraper/                          # 🕷️ DATA SCRAPER
+│   ├── index.js                      # Puppeteer scraper for wilson.com
+│   └── package.json                  # Scraper dependencies
+│
+├── vercel.json                       # Root Vercel deployment config
+├── render.yaml                       # Render deployment config
+├── PROJECT_DOCUMENTATION.md          # Detailed technical documentation
+└── README.md                         # ← You are here
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Node.js** v18 or higher
+- **npm** v9 or higher
+- **MongoDB** — either a local instance or a [MongoDB Atlas](https://www.mongodb.com/atlas) cluster
+- **Git** for version control
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-username/tennis-wilson-.git
+cd tennis-wilson-
+```
+
+### 2. Set Up the Backend
+
+```bash
+cd server
+npm install
+```
+
+Create a `.env` file in the `server/` directory:
+
+```env
+MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/wilson-tennis
+JWT_SECRET=your-super-secret-jwt-key
+NODE_ENV=development
+PORT=5001
+```
+
+Start the backend:
+
+```bash
+npm start
+# Server runs on http://localhost:5001
+```
+
+### 3. Set Up the Frontend
+
+```bash
+cd cinematic-tennis
+npm install
+npm run dev
+# Frontend runs on http://localhost:5173
+```
+
+### 4. (Optional) Seed the Database
+
+```bash
+cd server
+
+# Seed superadmin account
+node seedSuperadmin.js
+
+# Seed product data
+node seeder.js
+```
+
+### 5. (Optional) Run the Scraper
+
+```bash
+cd scraper
+npm install
+
+# Install Chrome for Puppeteer (if first time)
+npx puppeteer browsers install chrome
+
+# Scrape latest data from wilson.com
+node index.js
+# Output: wilson-rackets.json
+```
+
+---
+
+## 🔐 Environment Variables
+
+### Backend (`server/.env`)
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `MONGO_URI` | MongoDB connection string | ✅ |
+| `JWT_SECRET` | Secret key for JWT signing | ✅ |
+| `NODE_ENV` | `development` or `production` | ✅ |
+| `PORT` | Server port (default: 5001) | ❌ |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name (for image uploads) | ❌ |
+| `CLOUDINARY_API_KEY` | Cloudinary API key | ❌ |
+| `CLOUDINARY_API_SECRET` | Cloudinary API secret | ❌ |
+
+### Frontend (`cinematic-tennis/.env`)
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `VITE_API_URL` | Backend API base URL | `http://localhost:5001` (dev) / empty (production) |
+
+> **Note**: In production, `VITE_API_URL` is empty — Axios calls `/api/*` on the same domain, and Vercel routes these to the Express server.
+
+---
+
+## 📡 API Reference
+
+### Public Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/auth/signup` | Register a new user |
+| `POST` | `/api/auth/login` | Login and receive JWT |
+| `GET` | `/api/products` | List all products |
+| `GET` | `/api/products/:id` | Get product by ID |
+| `GET` | `/api/rackets` | Get rackets with filtering |
+| `GET` | `/api/rackets/:id` | Get racket by ID |
+
+### Protected Endpoints (JWT Required)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/auth/me` | Get current user profile |
+| `GET` | `/api/cart` | Get user's cart |
+| `POST` | `/api/cart/sync` | Sync cart to database |
+| `DELETE` | `/api/cart` | Clear cart |
+| `POST` | `/api/orders` | Create a new order |
+| `GET` | `/api/orders/myorders` | Get user's order history |
+| `POST` | `/api/users/address` | Add shipping address |
+| `PUT` | `/api/users/address/:id` | Update address |
+| `DELETE` | `/api/users/address/:id` | Delete address |
+
+### Admin Endpoints (JWT + Admin/Superadmin Role)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/admin/dashboard` | Dashboard data & stats |
+| `POST` | `/api/admin/add-product` | Add new product |
+| `PUT` | `/api/admin/update-stock/:id` | Update stock levels |
+| `GET` | `/api/admin/analytics` | Sales analytics |
+
+### Superadmin Endpoints (JWT + Superadmin Role)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/superadmin/dashboard` | Global dashboard |
+| `POST` | `/api/superadmin/create-admin` | Create admin account |
+| `DELETE` | `/api/superadmin/delete-admin/:id` | Delete admin account |
+
+---
+
+## 🗄 Database Schema
+
+### Users Collection
+```javascript
+{
+  name: String,
+  email: String (unique),
+  password: String (bcrypt hashed),
+  role: 'user' | 'admin' | 'superadmin',
+  region: 'US' | 'GB' | 'FR' | 'DE' | 'JP' | 'AU' | 'IN' | 'AE',
+  addresses: [{
+    label: String,        // "Home", "Office"
+    fullName: String,
+    phone: String,
+    address: String,
