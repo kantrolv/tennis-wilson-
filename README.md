@@ -498,3 +498,183 @@ node index.js
     fullName: String,
     phone: String,
     address: String,
+    city: String,
+    state: String,
+    zip: String,
+    country: String,
+    isDefault: Boolean
+  }]
+}
+```
+
+### Products Collection
+```javascript
+{
+  name: String,
+  brand: String,
+  model: String,
+  price: Number,              // Base USD price
+  pricing: {                  // Region-specific pricing
+    india: { price: Number, currency: 'INR' },
+    usa:   { price: Number, currency: 'USD' },
+    uk:    { price: Number, currency: 'GBP' },
+    uae:   { price: Number, currency: 'AED' },
+    // ...
+  },
+  category: String,
+  ageGroup: 'Adult' | 'Junior',
+  sport: String,
+  weight: String,
+  balance: String,
+  material: String,
+  stock: {                    // Per-region stock
+    india: Number, usa: Number, uk: Number, uae: Number, // ...
+  },
+  gripStock: {                // Per-region, per-grip-size stock
+    india: { G1: Number, G2: Number, G3: Number, G4: Number },
+    usa:   { G1: Number, G2: Number, G3: Number, G4: Number },
+    // ...
+  },
+  description: String,
+  imageUrl: String,
+  addedByRegion: String
+}
+```
+
+### Orders Collection
+```javascript
+{
+  user: ObjectId (ref: User),
+  region: String,
+  shippingAddress: {
+    fullName: String, address: String, city: String,
+    state: String, zip: String, country: String, phone: String
+  },
+  orderItems: [{
+    name: String, qty: Number, gripSize: String,
+    imageUrl: String, price: Number, product: ObjectId
+  }],
+  totalPrice: Number,
+  isDemo: true,               // Demo project — auto-completes
+  isPaid: true
+}
+```
+
+### Carts Collection
+```javascript
+{
+  user: ObjectId (ref: User),
+  cartItems: [{
+    product: ObjectId,
+    name: String, imageUrl: String, price: Number,
+    qty: Number,  maxStock: Number,  gripSize: String,
+    string: { id: String, name: String, price: Number },
+    cover:  { id: String, name: String, price: Number },
+    cartId: String   // Composite: "productId-gripSize-stringId-coverId"
+  }]
+}
+```
+
+---
+
+## 🌍 Multi-Region Pricing
+
+The platform supports 8 regions with two pricing strategies:
+
+### Dedicated Pricing (stored in DB)
+| Region | Currency | Symbol | Example (Blade v9) |
+|--------|----------|--------|---------------------|
+| 🇺🇸 USA | USD | $ | $249.00 |
+| 🇮🇳 India | INR | ₹ | ₹20,667 |
+| 🇬🇧 UK | GBP | £ | £197.00 |
+| 🇦🇪 UAE | AED | د.إ | د.إ914 |
+
+### Multiplier Conversion (calculated from USD)
+| Region | Currency | Multiplier | Example (Blade v9) |
+|--------|----------|------------|---------------------|
+| 🇫🇷 France | EUR | ×0.92 | €229.08 |
+| 🇩🇪 Germany | EUR | ×0.92 | €229.08 |
+| 🇯🇵 Japan | JPY | ×148 | ¥36,852 |
+| 🇦🇺 Australia | AUD | ×1.53 | A$380.97 |
+
+**How it works**: `regionPricing.js` checks if the product has a dedicated price for the selected region. If yes, it uses that. If not, it multiplies the base USD price by the region's exchange rate multiplier.
+
+---
+
+## 🔐 Authentication & Authorization
+
+### Authentication Flow
+1. **Signup** → POST `/api/auth/signup` → Password hashed with bcrypt → JWT issued
+2. **Login** → POST `/api/auth/login` → Password compared → JWT issued
+3. **Session** → JWT stored in localStorage → Axios interceptor attaches it to every request
+4. **Re-validation** → On app mount, if JWT exists → GET `/api/auth/me` to verify & load user data
+
+### JWT Verification (Dual-Collection Lookup)
+```
+Incoming Request → Extract Bearer token
+  → jwt.verify(token, JWT_SECRET) → Get user ID
+    → Look up in Users collection
+      → Not found? → Look up in Admins collection
+        → Not found? → 401 Unauthorized
+        → Found → req.user = user → next()
+```
+
+### Role-Based Access Control (RBAC)
+
+| Feature | User | Admin | Superadmin |
+|---------|:----:|:-----:|:----------:|
+| Browse & shop | ✅ | ✅ | ✅ |
+| Place orders | ✅ | ✅ | ✅ |
+| View own orders | ✅ | ✅ | ✅ |
+| Manage addresses | ✅ | ✅ | ✅ |
+| Admin Dashboard | ❌ | ✅ | ✅ |
+| Add products | ❌ | ✅ | ✅ |
+| Update stock/pricing | ❌ | ✅ (own region) | ✅ (all) |
+| View analytics | ❌ | ✅ (own region) | ✅ (global) |
+| Create/delete admins | ❌ | ❌ | ✅ |
+| Superadmin Dashboard | ❌ | ❌ | ✅ |
+
+---
+
+## 🎬 3D Animation System
+
+The homepage features a sophisticated 4-phase, scroll-driven 3D animation:
+
+### Phase 1: Racket Intro Spin (0% → 50% scroll)
+- Racket spins 450° from a close-up position to a mid-distance view
+- Camera/racket position interpolated using frame-rate-independent damping
+
+### Phase 2: Ball Descent (35% → 50% scroll)
+- Tennis ball drops from above into the scene
+- Cubic easing function for realistic physics feel
+
+### Phase 3: Hit Sequence (50% → 75% scroll)
+- Racket cocks back, accelerates forward in a swing motion
+- Ball launches **towards the camera**, filling the screen
+- Scene background transitions: `#050505` (dark) → `#F5F0EB` (off-white)
+- Header text color dynamically adapts via `mix-blend-mode: difference`
+
+### Phase 4: Product Showcase (75% → 100% scroll)
+- Racket smoothly moves to the right side of the viewport
+- Content sections (Hero, Strings, Frame, Players) appear on the left
+- 3 sub-stages: Head zoom → Handle pan → Full racket view
+- DOM element position tracking (`getBoundingClientRect`) aligns 3D racket with HTML text
+
+### Technical Stack
+- **`Experience.jsx`** — Main animation controller using `useFrame()` at 60fps
+- **`useScroll.js`** — GSAP `ScrollTrigger` exports scroll progress, velocity, and hit state
+- **`physics.js`** — `damp()` function: exponential decay interpolation using `THREE.MathUtils.lerp` with `1 - e^(-λ·Δt)`
+- **3D Models** — `.glb` format loaded via Drei's `useGLTF`, controlled via `forwardRef`
+
+---
+
+## 🛒 Cart Synchronization
+
+The cart uses a **dual-storage** architecture for seamless experience across sessions:
+
+### How It Works
+
+```
+GUEST USER                          LOGGED-IN USER
+───────────                         ──────────────
+  │                                    │
