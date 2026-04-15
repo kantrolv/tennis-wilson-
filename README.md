@@ -678,3 +678,103 @@ The cart uses a **dual-storage** architecture for seamless experience across ses
 GUEST USER                          LOGGED-IN USER
 ───────────                         ──────────────
   │                                    │
+  ├─ Add to cart                       ├─ On login:
+  │    └─ Save to localStorage         │    ├─ Fetch DB cart (GET /api/cart)
+  │                                    │    ├─ If DB empty & local has items:
+  │                                    │    │    └─ Push local → DB (POST /api/cart/sync)
+  │                                    │    └─ If DB has items:
+  │                                    │         └─ Replace local with DB cart
+  │                                    │
+  │                                    ├─ On cart change:
+  │                                    │    ├─ Immediate localStorage save
+  │                                    │    └─ 400ms debounced POST /api/cart/sync
+  │                                    │
+  │                                    └─ On logout:
+  └─ Cart persists in browser               └─ Clear cart state + localStorage
+```
+
+### Key Design Details
+- **Composite Cart ID**: Each cart item has a unique `cartId` = `productId-gripSize-stringId-coverId`
+- **Debounced Sync**: 400ms debounce prevents hammering the backend during rapid quantity changes
+- **`normalizeCartItem()`**: Reconciles field name differences between frontend (`quantity`) and backend (`qty`)
+
+---
+
+## 🚢 Deployment
+
+### Vercel (Frontend + Serverless API)
+
+The root `vercel.json` configures:
+- `/api/*` routes → Express.js server (`server/index.js`) as a serverless function
+- `/*` routes → React SPA static build (`cinematic-tennis/dist`)
+
+```json
+{
+  "builds": [
+    { "src": "cinematic-tennis/package.json", "use": "@vercel/static-build" },
+    { "src": "server/index.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "server/index.js" },
+    { "src": "/(.*)", "dest": "cinematic-tennis/$1" }
+  ]
+}
+```
+
+### Render (Backend API)
+
+The `render.yaml` deploys the Express server as a web service:
+
+```yaml
+services:
+  - type: web
+    name: tennis-wilson-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node index.js
+```
+
+### Dual-Mode Server Pattern
+
+The Express server supports both standalone and serverless execution:
+
+```javascript
+// server/index.js
+if (require.main === module) {
+  // Standalone: Start HTTP listener (Render, local dev)
+  app.listen(PORT, () => console.log(`Server on port ${PORT}`));
+}
+module.exports = app; // Serverless: Export for Vercel import
+```
+
+---
+
+## 💡 Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| **Cinematic 3D homepage** | Wilson is a premium brand — the shopping experience should feel premium. Creates a "wow factor" first impression. |
+| **Separate User + Admin collections** | Security isolation — if the User collection is compromised, admin credentials remain protected in a separate collection. |
+| **Dual cart storage (localStorage + MongoDB)** | Guest users can build a cart without logging in. Cart data seamlessly syncs on login — no data is ever lost. |
+| **Region-based pricing in DB** | 4 key markets (US, IN, GB, AE) get manually curated prices for accuracy. Other markets use multiplier conversion for convenience. |
+| **Per-grip-size stock tracking** | A racket in grip G2 might be in stock while G4 is sold out. This granularity prevents overselling. |
+| **Debounced 400ms cart sync** | Prevents excessive backend calls when users rapidly adjust quantities. Balances real-time feel with server efficiency. |
+| **GSAP + Lenis over CSS animations** | JavaScript-driven animations provide the precise scroll-position control needed for the 3D choreography. CSS alone can't achieve this level of synchronization. |
+| **`require.main === module` pattern** | Enables the same Express app to run as a standalone server (Render) or as a Vercel serverless function — no code duplication. |
+| **URL-synced shop filters** | Users can share filtered product views via URL. The browser back button correctly restores filter state. |
+| **React Context over Redux** | With only 3 global state slices (Region, Auth, Cart), React Context keeps the architecture simple without the Redux boilerplate. |
+
+---
+
+## 🎨 Design System
+
+### Color Palette
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `--c-royal-blue` | `#051025` | Primary background (deepest midnight blue) |
+| `--c-royal-blue-light` | `#0d2247` | Secondary backgrounds |
+| `--c-gold` | `#D4AF37` | Accent color, CTAs, highlights |
+| `--c-gold-dim` | `#8a7122` | Muted gold accents |
+| `--c-ivory` | `#fcfcf7` | Primary text |
