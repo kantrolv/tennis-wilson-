@@ -778,3 +778,74 @@ module.exports = app; // Serverless: Export for Vercel import
 | `--c-gold` | `#D4AF37` | Accent color, CTAs, highlights |
 | `--c-gold-dim` | `#8a7122` | Muted gold accents |
 | `--c-ivory` | `#fcfcf7` | Primary text |
+| `--c-wilson-red` | `#cf102d` | Wilson brand red |
+| `--c-tennis-green` | `#ccff00` | Tennis green accent |
+| `--c-beige-royal` | `#f5f5f0` | Light background (post-animation) |
+
+### Typography
+
+| Font | Family | Usage |
+|------|--------|-------|
+| **Playfair Display** | Serif | Headlines, logo, premium headings |
+| **Inter** | Sans-serif | Body text, navigation, UI elements |
+
+### Spacing Scale
+
+```
+xs: 0.5rem  |  sm: 1rem  |  md: 2rem  |  lg: 4rem  |  xl: 8rem
+```
+
+---
+
+## 🔧 Scripts & Utilities
+
+### Frontend Scripts
+```bash
+npm run dev      # Start Vite dev server
+npm run build    # Production build
+npm run lint     # Run ESLint
+npm run preview  # Preview production build
+```
+
+### Backend Scripts
+```bash
+npm start        # Start Express server
+npm run dev      # Start in development mode
+npm run seed     # Run database seeder
+```
+
+### Utility Scripts (in `server/`)
+| Script | Purpose |
+|--------|---------|
+| `seeder.js` | Seed products from scraped JSON data |
+| `seedSuperadmin.js` | Create initial superadmin account |
+| `migrateAdmins.js` | Migrate admin data between collections |
+| `resetStock.js` | Reset stock levels across all regions |
+| `migrate_grip.js` | Add grip-level stock tracking to products |
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is built for educational and portfolio purposes. Wilson® is a registered trademark of Wilson Sporting Goods Co. This project is not affiliated with or endorsed by Wilson.
+
+---
+
+<div align="center">
+
+**Built with ❤️ and 🎾**
+
+*React • Three.js • GSAP • Express • MongoDB*
+
+</div>
+]]>
