@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 
 const Footer = () => {
     const location = useLocation();
@@ -45,7 +45,11 @@ const Footer = () => {
                     <div>
                         <h4 style={{ fontSize: '0.9rem', marginBottom: '1rem', color: accentColor }}>Shop</h4>
                         <ul style={{ listStyle: 'none', color: mutedColor, lineHeight: '2' }}>
-                            <li>Rackets</li>
+                            <li>
+                                <Link to="/rackets" style={{ color: 'inherit', textDecoration: 'none' }}>
+                                    Rackets
+                                </Link>
+                            </li>
                         </ul>
                     </div>
                     <div>
