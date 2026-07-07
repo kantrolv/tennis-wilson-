@@ -46,7 +46,7 @@ const Login = () => {
                 <p className="auth-subtitle">Sign in to access your pro gear.</p>
 
                 <div className="auth-notice">
-                    <span className="auth-notice__icon">☕</span>
+
                     <span>
                         <strong>Heads up:</strong> this demo runs on free hosting, so the
                         server may take <strong>2–3 minutes to wake up</strong> on the first
