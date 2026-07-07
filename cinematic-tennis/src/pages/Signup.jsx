@@ -62,7 +62,7 @@ const Signup = () => {
                 <p className="auth-subtitle">Create an account to track your orders.</p>
 
                 <div className="auth-notice">
-                    <span className="auth-notice__icon">☕</span>
+
                     <span>
                         <strong>Heads up:</strong> this demo runs on free hosting, so the
                         server may take <strong>2–3 minutes to wake up</strong> on your first
