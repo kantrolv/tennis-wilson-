@@ -5,7 +5,7 @@ import { Racket } from "./Racket";
 import { useScroll, scrollState } from "../hooks/useScroll";
 import { useRef } from "react";
 import * as THREE from "three";
-import { damp } from "../utils/physics";
+import { smoothDamp } from "../utils/physics";
 import gsap from "gsap";
 
 export default function Experience() {
@@ -21,6 +21,19 @@ export default function Experience() {
 
     const smoothProgress = useRef(0);
 
+    // Per-channel velocity state for the critically-damped springs.
+    // Every animated value keeps its own momentum so it eases in AND out.
+    const vel = useRef({
+        prog: 0,
+        rpx: 0, rpy: 0, rpz: 0, rrx: 0, rry: 0, rrz: 0, rsx: 0, rsy: 0, rsz: 0,
+        bpx: 0, bpy: 0, bpz: 0, brx: 0, bry: 0, brz: 0, bsx: 0, bsy: 0, bsz: 0,
+    });
+
+    // How fast each spring chases its target (seconds). Smaller = snappier.
+    const PROGRESS_SMOOTH = 0.28; // scroll → animation progress (the "silky scroll" feel)
+    const MOVE_SMOOTH = 0.14;     // racket/ball position & rotation
+    const SCALE_SMOOTH = 0.11;    // scale reacts a touch quicker so grows land on time
+
     // Easing helper for extra-smooth ball flight
     const easeInOutCubic = (t) => {
         return t < 0.5
@@ -29,11 +42,16 @@ export default function Experience() {
     };
 
     useFrame((state, delta) => {
-        // Smooth scroll progress with damping for silky animation
-        // Lambda of 2.0 gives smooth motion while catching up fast enough
-        // to prevent content peeking during fast scroll
-        const timeLambda = 2.0;
-        smoothProgress.current = damp(smoothProgress.current, scrollState.progress, timeLambda, delta);
+        // Clamp delta so a frame spike (tab switch, GC pause, low FPS) can never
+        // launch the springs into a jump — keeps motion continuous "at every time".
+        const dt = Math.min(delta, 0.05);
+
+        // Smooth scroll progress with a critically-damped spring for silky,
+        // momentum-carrying motion that still catches up fast enough during a
+        // quick scroll to keep content from peeking early.
+        smoothProgress.current = smoothDamp(
+            smoothProgress.current, scrollState.progress, vel.current, 'prog', PROGRESS_SMOOTH, dt
+        );
         const p = smoothProgress.current;
 
         // -- Choreography Targets --
@@ -340,42 +358,52 @@ export default function Experience() {
             }
         }
 
-        // Apply Damping to VECTORS
-        // vectorLambda 10 = responsive to scroll while smooth
-        const vectorLambda = 10
+        // Apply critically-damped springs to every animated channel.
+        // Each channel carries its own velocity, so targets that jump at phase
+        // boundaries are absorbed with a continuous velocity (no snap) and the
+        // motion eases in and out — smooth at every point.
+        const v = vel.current;
 
         if (racketRef.current) {
-            racketRef.current.position.x = damp(racketRef.current.position.x, rPos.x, vectorLambda, delta);
-            // When directYControl is on, set Y directly (no damping)
-            // so the racket moves exactly at the same speed as the page content
+            const rp = racketRef.current.position;
+            const rr = racketRef.current.rotation;
+            const rs = racketRef.current.scale;
+
+            rp.x = smoothDamp(rp.x, rPos.x, v, 'rpx', MOVE_SMOOTH, dt);
+            // directYControl (used during exit) tracks page scroll 1:1 with no lag
             if (directYControl.current) {
-                racketRef.current.position.y = rPos.y;
+                rp.y = rPos.y;
+                v.rpy = 0;
             } else {
-                racketRef.current.position.y = damp(racketRef.current.position.y, rPos.y, vectorLambda, delta);
+                rp.y = smoothDamp(rp.y, rPos.y, v, 'rpy', MOVE_SMOOTH, dt);
             }
-            racketRef.current.position.z = damp(racketRef.current.position.z, rPos.z, vectorLambda, delta);
+            rp.z = smoothDamp(rp.z, rPos.z, v, 'rpz', MOVE_SMOOTH, dt);
 
-            racketRef.current.rotation.x = damp(racketRef.current.rotation.x, rRot.x, vectorLambda, delta);
-            racketRef.current.rotation.y = damp(racketRef.current.rotation.y, rRot.y, vectorLambda, delta);
-            racketRef.current.rotation.z = damp(racketRef.current.rotation.z, rRot.z, vectorLambda, delta);
+            rr.x = smoothDamp(rr.x, rRot.x, v, 'rrx', MOVE_SMOOTH, dt);
+            rr.y = smoothDamp(rr.y, rRot.y, v, 'rry', MOVE_SMOOTH, dt);
+            rr.z = smoothDamp(rr.z, rRot.z, v, 'rrz', MOVE_SMOOTH, dt);
 
-            racketRef.current.scale.x = damp(racketRef.current.scale.x, rScale.x, vectorLambda, delta);
-            racketRef.current.scale.y = damp(racketRef.current.scale.y, rScale.y, vectorLambda, delta);
-            racketRef.current.scale.z = damp(racketRef.current.scale.z, rScale.z, vectorLambda, delta);
+            rs.x = smoothDamp(rs.x, rScale.x, v, 'rsx', SCALE_SMOOTH, dt);
+            rs.y = smoothDamp(rs.y, rScale.y, v, 'rsy', SCALE_SMOOTH, dt);
+            rs.z = smoothDamp(rs.z, rScale.z, v, 'rsz', SCALE_SMOOTH, dt);
         }
 
         if (ballRef.current) {
-            ballRef.current.position.x = damp(ballRef.current.position.x, bPos.x, vectorLambda, delta);
-            ballRef.current.position.y = damp(ballRef.current.position.y, bPos.y, vectorLambda, delta);
-            ballRef.current.position.z = damp(ballRef.current.position.z, bPos.z, vectorLambda, delta);
+            const bp = ballRef.current.position;
+            const br = ballRef.current.rotation;
+            const bs = ballRef.current.scale;
 
-            ballRef.current.scale.x = damp(ballRef.current.scale.x, bScale.x, vectorLambda, delta);
-            ballRef.current.scale.y = damp(ballRef.current.scale.y, bScale.y, vectorLambda, delta);
-            ballRef.current.scale.z = damp(ballRef.current.scale.z, bScale.z, vectorLambda, delta);
+            bp.x = smoothDamp(bp.x, bPos.x, v, 'bpx', MOVE_SMOOTH, dt);
+            bp.y = smoothDamp(bp.y, bPos.y, v, 'bpy', MOVE_SMOOTH, dt);
+            bp.z = smoothDamp(bp.z, bPos.z, v, 'bpz', MOVE_SMOOTH, dt);
 
-            ballRef.current.rotation.x = damp(ballRef.current.rotation.x, bRot.x, vectorLambda, delta);
-            ballRef.current.rotation.y = damp(ballRef.current.rotation.y, bRot.y, vectorLambda, delta);
-            ballRef.current.rotation.z = damp(ballRef.current.rotation.z, bRot.z, vectorLambda, delta);
+            bs.x = smoothDamp(bs.x, bScale.x, v, 'bsx', SCALE_SMOOTH, dt);
+            bs.y = smoothDamp(bs.y, bScale.y, v, 'bsy', SCALE_SMOOTH, dt);
+            bs.z = smoothDamp(bs.z, bScale.z, v, 'bsz', SCALE_SMOOTH, dt);
+
+            br.x = smoothDamp(br.x, bRot.x, v, 'brx', MOVE_SMOOTH, dt);
+            br.y = smoothDamp(br.y, bRot.y, v, 'bry', MOVE_SMOOTH, dt);
+            br.z = smoothDamp(br.z, bRot.z, v, 'brz', MOVE_SMOOTH, dt);
         }
     });
 
