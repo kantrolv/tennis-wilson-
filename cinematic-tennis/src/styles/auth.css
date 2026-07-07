@@ -120,6 +120,80 @@
     color: #aaa;
 }
 
+/* Free-hosting notice (helps recruiters understand the cold-start delay) */
+.auth-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    background: rgba(0, 47, 108, 0.05);
+    border: 1px solid rgba(0, 47, 108, 0.12);
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 1.75rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: #3a4a63;
+}
+
+.auth-notice strong {
+    color: var(--auth-accent);
+    font-weight: 600;
+}
+
+.auth-notice__icon {
+    font-size: 1.1rem;
+    line-height: 1.3;
+    flex-shrink: 0;
+}
+
+/* Cold-start note shown while the request is in flight */
+.auth-waking-note {
+    margin-top: 0.9rem;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: #6b7688;
+    animation: auth-note-fade 0.4s ease;
+}
+
+@keyframes auth-note-fade {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading state inside the submit button */
+.auth-button__loading {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+}
+
+.auth-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: auth-spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes auth-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 /* Button */
 .auth-button {
     width: 100%;
@@ -146,6 +220,14 @@
 
 .auth-button:active {
     transform: translateY(0px);
+}
+
+.auth-button:disabled {
+    cursor: wait;
+    opacity: 0.9;
+    background: var(--auth-accent);
+    transform: none;
+    box-shadow: none;
 }
 
 /* Links */

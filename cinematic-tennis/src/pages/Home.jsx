@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import Experience from "../components/Experience";
 import { HTMLOverlay } from "../components/HTMLOverlay";
 import { Loader } from "../components/Loader";
+import { ScrollHint } from "../components/ScrollHint";
 import Layout from "../components/layout/Layout";
 import RacketHero from "../components/sections/RacketHero";
 import RacketStrings from "../components/sections/RacketStrings";
@@ -60,6 +61,8 @@ const Home = () => {
                     </div>
                 </Layout>
             </div>
+
+            <ScrollHint />
 
             <div className="grain-overlay" />
             <Loader />

@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
     const { syncRegionFromUser } = useRegion();
 
     useEffect(() => {
+        
         const checkUserLoggedIn = async () => {
             const token = localStorage.getItem('token');
 

@@ -5,6 +5,7 @@ import AuthContext from '../context/AuthContext';
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [submitting, setSubmitting] = useState(false);
     const { login, error } = useContext(AuthContext);
     const navigate = useNavigate();
     const location = useLocation();
@@ -14,6 +15,7 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setSubmitting(true);
         try {
             const data = await login(email, password);
 
@@ -27,6 +29,7 @@ const Login = () => {
             }
         } catch (err) {
             console.error(err);
+            setSubmitting(false);
         }
     };
 
@@ -41,6 +44,15 @@ const Login = () => {
             <div className="auth-card">
                 <h1 className="auth-title">Welcome Back</h1>
                 <p className="auth-subtitle">Sign in to access your pro gear.</p>
+
+                <div className="auth-notice">
+                    <span className="auth-notice__icon">☕</span>
+                    <span>
+                        <strong>Heads up:</strong> this demo runs on free hosting, so the
+                        server may take <strong>2–3 minutes to wake up</strong> on the first
+                        sign in. Thanks for your patience!
+                    </span>
+                </div>
 
                 {error && (
                     <div className="auth-error">
@@ -73,9 +85,23 @@ const Login = () => {
                         />
                     </div>
 
-                    <button type="submit" className="auth-button">
-                        Sign In
+                    <button type="submit" className="auth-button" disabled={submitting}>
+                        {submitting ? (
+                            <span className="auth-button__loading">
+                                <span className="auth-spinner" />
+                                Waking the server… hang tight
+                            </span>
+                        ) : (
+                            'Sign In'
+                        )}
                     </button>
+
+                    {submitting && (
+                        <p className="auth-waking-note">
+                            Free hosting spins the backend down when idle — first request
+                            can take up to 2–3 minutes. Please don't refresh.
+                        </p>
+                    )}
 
                     <div className="auth-links">
                         <span className="auth-link-text">Don't have an account?</span>
